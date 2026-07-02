@@ -1,0 +1,19 @@
+{
+    "_comentario": "api_key y secret_key se leen de variables de entorno en Railway (BINANCE_API_KEY, BINANCE_SECRET_KEY)",
+    "api_key": "",
+    "secret_key": "",
+    "symbol": "WLDUSDT",
+    "leverage": 15,
+    "margen_pct": 30,
+    "max_pos_size": 15000,
+    "factor_tp": 6.09,
+    "factor_sl": 2.61,
+    "use_short": true,
+    "demo_mode": false,
+    "models_dir": "./models",
+    "model_prefix": "ethusdt",
+    "log_level": "INFO",
+    "max_reinicios": 10,
+    "espera_reinicio_seg": 60,
+    "timeout_velas": 15
+}

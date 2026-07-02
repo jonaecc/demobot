@@ -1,0 +1,18 @@
+# Estado interno del bot
+bot_state_v4.json
+
+# Logs y exports
+*.csv
+export/
+*.log
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.env
+venv/
+.venv/
+
+# Archivos grandes de analisis (solo para backtest local, no para produccion)
+models/ethusdt/behavior_clean_train_detail.json

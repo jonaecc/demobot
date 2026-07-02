@@ -1,0 +1,7 @@
+ccxt==4.3.89
+pandas>=2.2.2
+pandas-ta>=0.4.71b0
+numpy>=2.2.6
+python-binance>=1.0.20
+scipy>=1.13.1
+

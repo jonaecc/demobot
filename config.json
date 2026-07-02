@@ -1,0 +1,20 @@
+{
+    "_comentario": "api_key y secret_key se leen de variables de entorno en Railway (BINANCE_API_KEY, BINANCE_SECRET_KEY)",
+    "_comentario_demo": "demo_mode=true usa Binance Futures TESTNET. Requiere API keys generadas en https://testnet.binancefuture.com — son DISTINTAS a las keys de producción y no sirven para la cuenta real.",
+    "api_key": "",
+    "secret_key": "",
+    "symbol": "WLDUSDT",
+    "leverage": 15,
+    "margen_pct": 30,
+    "max_pos_size": 15000,
+    "factor_tp": 5,
+    "factor_sl": 2.61,
+    "use_short": true,
+    "demo_mode": true,
+    "models_dir": "./models",
+    "model_prefix": "ethusdt",
+    "log_level": "INFO",
+    "max_reinicios": 10,
+    "espera_reinicio_seg": 60,
+    "timeout_velas": 15
+}
