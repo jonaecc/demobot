@@ -8,6 +8,7 @@
     "max_pos_size": 15000,
     "factor_tp": 6.09,
     "factor_sl": 2.61,
+    "tp_fijo_pct": null,
     "use_short": true,
     "demo_mode": false,
     "models_dir": "./models",

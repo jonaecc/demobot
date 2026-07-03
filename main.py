@@ -166,6 +166,7 @@ def main():
         model_prefix   = cfg.get("model_prefix", "ethusdt"),
         use_short      = cfg.get("use_short", True),
         demo_mode      = cfg.get("demo_mode", False),
+        tp_fijo_pct    = cfg.get("tp_fijo_pct"),
         ui_ref         = ui_ref,
     )
 

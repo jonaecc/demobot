@@ -351,7 +351,8 @@ def _check_pretrigger(features: dict, esc_data: dict) -> tuple[bool, str]:
 def _get_tp_sl_summary(escenario_key: str, summary: dict,
                         direccion: str,
                         factor_tp: float,
-                        factor_sl: float) -> tuple[float, float] | None:
+                        factor_sl: float,
+                        tp_fijo_pct: float = None) -> tuple[float, float] | None:
     """
     Calcula TP y SL desde los promedios históricos del summary (post_15m).
     Retorna (tp_pct, sl_pct) o None si no hay datos suficientes.
@@ -374,13 +375,19 @@ def _get_tp_sl_summary(escenario_key: str, summary: dict,
 
     if direccion == "LONG":
         sl = max(mfe_d * factor_sl, 0.05)
-        tp = max(mfe_u * factor_tp, 0.10) if factor_tp and factor_tp > 0 else None
+        if tp_fijo_pct is not None and tp_fijo_pct > 0:
+            tp = float(tp_fijo_pct)
+        else:
+            tp = max(mfe_u * factor_tp, 0.10) if factor_tp and factor_tp > 0 else None
     else:
         sl = max(mfe_u * factor_sl, 0.05)
-        tp = max(mfe_d * factor_tp, 0.10) if factor_tp and factor_tp > 0 else None
+        if tp_fijo_pct is not None and tp_fijo_pct > 0:
+            tp = float(tp_fijo_pct)
+        else:
+            tp = max(mfe_d * factor_tp, 0.10) if factor_tp and factor_tp > 0 else None
 
-    tp_final = min(round(tp, 4), 50.0) if tp is not None else None
-    return tp_final, min(round(sl, 4), 15.0)
+    tp_final = min(round(tp, 4), 8.0) if tp is not None else None
+    return tp_final, min(round(sl, 4), 3.0)
 
 
 # ══════════════════════════════════════════════════════════════════
@@ -437,6 +444,7 @@ class MLLiveBotWorker:
         # Factores TP/SL (se actualizan desde UI en el loop)
         self.factor_tp = float(tp)
         self.factor_sl = float(sl)
+        self.tp_fijo_pct = kwargs.get("tp_fijo_pct")
 
         # ── Behavior + pretrigger ─────────────────────────────────
         self.models_dir   = models_dir
@@ -649,7 +657,7 @@ class MLLiveBotWorker:
         # TP/SL desde summary post_15m
         tp_pct, sl_pct = _get_tp_sl_summary(
             escenario_key, self.summary, direccion,
-            self.factor_tp, self.factor_sl
+            self.factor_tp, self.factor_sl, getattr(self, "tp_fijo_pct", None)
         )
 
         signal = "buy" if direccion == "LONG" else "sell"
@@ -1684,45 +1692,19 @@ class MLLiveBotWorker:
                 if float(r15["current"]["low"]) < pos["max_alcanzado"]:
                     pos["max_alcanzado"] = float(r15["current"]["low"])
 
-            # Cierre por timeout: 10 velas × 15 min = 150 min desde entrada
-            from datetime import timezone as _tz
-            ts_timeout = pos.get("ts_timeout")
-            if ts_timeout is not None:
-                ahora = datetime.now(_tz.utc)
-                if isinstance(ts_timeout, str):
-                    ts_timeout = pd.Timestamp(ts_timeout).to_pydatetime()
-                    if ts_timeout.tzinfo is None:
-                        ts_timeout = ts_timeout.replace(tzinfo=_tz.utc)
-                if ahora >= ts_timeout:
-                    self.log.info("⏱️ Timeout 10 velas alcanzado — cerrando posición")
-                    try:
-                        opp = "sell" if side == "buy" else "buy"
-                        self.exchange.create_order(
-                            self.symbol, "market", opp, pos["qty"],
-                            params={"reduceOnly": True}
-                        )
-                        try:
-                            self._cancel_all_orders(self.get_clean_symbol())
-                        except Exception:
-                            pass
-                    except Exception as e:
-                        self.log.error(f"Error cierre timeout: {e}")
-                    return
-
+            # 1. Verificar si la posición sigue abierta en el exchange
             symbol_clean = self.get_clean_symbol()
             pos_info     = self.client.futures_position_information(symbol=symbol_clean)
             active_pos   = next((p for p in pos_info if float(p["positionAmt"]) != 0), None)
 
             if not active_pos:
-                # Posición cerrada (SL, TP o cierre manual)
+                # Posición cerrada (SL, TP, timeout o cierre manual)
                 try:
                     self._cancel_all_orders(symbol_clean)
                 except Exception:
                     pass
 
-                # Forzar sync inmediato del balance real — captura cierres
-                # manuales, SL ejecutados por el exchange, y cualquier PnL
-                # realizado fuera del bot.
+                # Forzar sync inmediato del balance real
                 self.sync_balance(force=True)
 
                 precio_salida = float(r15["current"]["close"])
@@ -1749,6 +1731,33 @@ class MLLiveBotWorker:
                 self.posicion_actual = None
                 self.entry_lock      = False
                 self.save_internal_state()
+                return
+
+            # 2. Cierre por timeout si sigue abierta
+            from datetime import timezone as _tz
+            ts_timeout = pos.get("ts_timeout")
+            if ts_timeout is not None:
+                ahora = datetime.now(_tz.utc)
+                if isinstance(ts_timeout, str):
+                    ts_timeout = pd.Timestamp(ts_timeout).to_pydatetime()
+                    if ts_timeout.tzinfo is None:
+                        ts_timeout = ts_timeout.replace(tzinfo=_tz.utc)
+                if ahora >= ts_timeout:
+                    tv = getattr(self, "timeout_velas", 10)
+                    self.log.info(f"⏱️ Timeout {tv} velas alcanzado — cerrando posición")
+                    try:
+                        opp = "sell" if side == "buy" else "buy"
+                        self.exchange.create_order(
+                            self.symbol, "market", opp, pos["qty"],
+                            params={"reduceOnly": True}
+                        )
+                        try:
+                            self._cancel_all_orders(self.get_clean_symbol())
+                        except Exception:
+                            pass
+                    except Exception as e:
+                        self.log.error(f"Error cierre timeout: {e}")
+                    return
 
         except Exception as e:
             self.log.error(f"Error monitor_position: {e}")
