@@ -495,9 +495,42 @@ class MLLiveBotWorker:
         # True si la cuenta está en Hedge Mode (detectado en resync_session)
         self._hedge_mode = False
 
+        # Ban de IP por rate-limit Binance (-1003): timestamp UNIX (ms) hasta el que dura
+        self._api_ban_until_ms = 0
+
     # ──────────────────────────────────────────────────────────────
     # UTILIDADES
     # ──────────────────────────────────────────────────────────────
+
+    def _is_banned(self) -> bool:
+        """Devuelve True si el IP sigue baneado por Binance (-1003)."""
+        return time.time() * 1000 < self._api_ban_until_ms
+
+    def _handle_rate_limit_error(self, e: Exception) -> bool:
+        """
+        Detecta el error -1003 (IP ban) de Binance y almacena el timestamp
+        de fin del ban para evitar más requests durante ese período.
+        Devuelve True si era un error de ban/rate-limit.
+        """
+        err_str = str(e)
+        if "-1003" in err_str or "Way too many requests" in err_str:
+            # Intentar extraer el timestamp de fin del ban del mensaje
+            import re
+            m = re.search(r'banned until (\d+)', err_str)
+            if m:
+                ban_until_ms = int(m.group(1))
+                self._api_ban_until_ms = ban_until_ms
+                ban_secs = max(0, (ban_until_ms - time.time() * 1000) / 1000)
+                self.log.warning(
+                    f"🚫 IP baneada por Binance. Pausando requests REST por {ban_secs:.0f}s "
+                    f"(hasta {ban_until_ms}). Usando datos en caché."
+                )
+            else:
+                # Sin timestamp explícito: esperar 60 s por precaución
+                self._api_ban_until_ms = (time.time() + 60) * 1000
+                self.log.warning("🚫 Rate limit -1003 sin timestamp. Pausando 60s.")
+            return True
+        return False
 
     def get_clean_symbol(self):
         return self.symbol.replace("/", "").split(":")[0]
@@ -1004,6 +1037,9 @@ class MLLiveBotWorker:
         now = time.time()
         if not force and now - self.last_balance_sync < 60:
             return
+        # No intentar si el IP está baneado
+        if self._is_banned():
+            return
         try:
             balance_data   = self.client.futures_account_balance()
             balance_actual = next(
@@ -1031,7 +1067,8 @@ class MLLiveBotWorker:
                 )
 
         except Exception as e:
-            self.log.warning(f"sync_balance error: {e}")
+            if not self._handle_rate_limit_error(e):
+                self.log.warning(f"sync_balance error: {e}")
 
     def _get_open_orders_robust(self, symbol_clean: str) -> list:
         """
@@ -1053,11 +1090,15 @@ class MLLiveBotWorker:
                 seen[oid] = o
             self.log.info(f"[audit] futures_get_open_orders → {len(seen)} órdenes")
         except Exception as _e:
+            if self._handle_rate_limit_error(_e):
+                return list(seen.values())
             self.log.warning(f"[audit] futures_get_open_orders falló: {_e}")
 
         # ── Fuente 2: GET /fapi/v1/openAlgoOrders (endpoint correcto según docs) ──
         # NOTA: el endpoint es openAlgoOrders (open primero), NO algoOpenOrders.
         # algoOpenOrders devuelve 404 — nombre incorrecto que estaba en el código.
+        if self._is_banned():
+            return list(seen.values())
         try:
             result      = self.client._request_futures_api(
                 'get', 'openAlgoOrders', True, data={"symbol": symbol_clean}
@@ -1072,6 +1113,8 @@ class MLLiveBotWorker:
                     added += 1
             self.log.info(f"[audit] openAlgoOrders → {len(algo_orders)} algo ({added} nuevas)")
         except Exception as _e:
+            if self._handle_rate_limit_error(_e):
+                return list(seen.values())
             self.log.warning(f"[audit] openAlgoOrders falló: {_e}")
 
         # ── Fuente 3: historial reciente si aún no tenemos SL ──────────────
@@ -1080,7 +1123,7 @@ class MLLiveBotWorker:
             and (o.get("algoStatus") or o.get("status", "NEW")) in ("NEW", "WORKING")
             for o in seen.values()
         )
-        if not has_sl_so_far:
+        if not has_sl_so_far and not self._is_banned():
             try:
                 # Últimas 10 órdenes del símbolo; filtramos por estado NEW
                 all_orders = self.client.futures_get_all_orders(
@@ -1096,6 +1139,7 @@ class MLLiveBotWorker:
                 if added:
                     self.log.info(f"[audit] get_all_orders fallback (+{added} NEW)")
             except Exception as _e3:
+                self._handle_rate_limit_error(_e3)
                 self.log.warning(f"[audit] get_all_orders falló: {_e3}")
 
         return list(seen.values())
@@ -1105,6 +1149,9 @@ class MLLiveBotWorker:
         # el ciclo cancelar→recrear SL (has_sl=False en cada poll de 5s).
         now = time.time()
         if now - self.last_audit_time < 60:
+            return
+        # No auditar si el IP está baneado — evita acumular más requests
+        if self._is_banned():
             return
         self.last_audit_time = now
 
@@ -1262,7 +1309,7 @@ class MLLiveBotWorker:
                             f"🚨 sl_precio ({sl_para_resync:.4f}) está en entry ({entry_para_resync:.4f}) "
                             f"— reconstrucción fallida, NO se coloca SL para evitar cierre inmediato"
                         )
-                    else:
+                    elif not self._is_banned():
                         pos_check  = self.client.futures_position_information(symbol=symbol_clean)
                         still_open = next((p for p in pos_check if float(p["positionAmt"]) != 0), None)
                         if still_open:
@@ -1282,9 +1329,13 @@ class MLLiveBotWorker:
                     self.save_internal_state()
 
         except Exception as e:
-            self.log.error(f"Error auditoría: {e}")
+            if not self._handle_rate_limit_error(e):
+                self.log.error(f"Error auditoría: {e}")
 
     def _manage_circuit_breaker(self):
+        # No intentar si el IP está baneado
+        if self._is_banned():
+            return
         try:
             balance_data   = self.client.futures_account_balance()
             balance_actual = next((float(b["balance"]) for b in balance_data if b["asset"] == "USDT"), 0.0)
@@ -1302,7 +1353,8 @@ class MLLiveBotWorker:
                     self.save_internal_state()
 
         except Exception as e:
-            self.log.error(f"Error Circuit Breaker: {e}")
+            if not self._handle_rate_limit_error(e):
+                self.log.error(f"Error Circuit Breaker: {e}")
 
     # ──────────────────────────────────────────────────────────────
     # PROTECCIONES SL / TP EN EL EXCHANGE
@@ -1489,7 +1541,8 @@ class MLLiveBotWorker:
             return True
 
         except Exception as e:
-            self.log.error(f"Error protecciones (SL): {e}")
+            if not self._handle_rate_limit_error(e):
+                self.log.error(f"Error protecciones (SL): {e}")
             return False
 
     # ──────────────────────────────────────────────────────────────
@@ -1663,7 +1716,8 @@ class MLLiveBotWorker:
 
         except Exception as e:
             self.entry_lock = False
-            self.log.error(f"Error execute_entry: {e}")
+            if not self._handle_rate_limit_error(e):
+                self.log.error(f"Error execute_entry: {e}")
             return False
 
     # ──────────────────────────────────────────────────────────────
@@ -1760,7 +1814,8 @@ class MLLiveBotWorker:
                     return
 
         except Exception as e:
-            self.log.error(f"Error monitor_position: {e}")
+            if not self._handle_rate_limit_error(e):
+                self.log.error(f"Error monitor_position: {e}")
 
     # ──────────────────────────────────────────────────────────────
     # LOOP PRINCIPAL
@@ -1829,6 +1884,13 @@ class MLLiveBotWorker:
                     except Exception:
                         pass
 
+                # ── Si IP está baneada, saltar todo polling REST ────────
+                if self._is_banned():
+                    ban_secs = max(0, (self._api_ban_until_ms / 1000) - time.time())
+                    wait = min(ban_secs + 1, 120)
+                    time.sleep(wait)
+                    continue
+
                 # ── Datos de mercado (Polling optimizado) ───────────────
                 try:
                     # Polling ligero para detectar nueva vela y precio actual (peso 1)
@@ -1839,6 +1901,12 @@ class MLLiveBotWorker:
                     # Reset backoff al primer request exitoso
                     self._poll_backoff = 5
                 except Exception as e:
+                    # Detectar ban -1003 también en ccxt (envuelve los códigos)
+                    if self._handle_rate_limit_error(e):
+                        ban_secs = max(0, (self._api_ban_until_ms / 1000) - time.time())
+                        wait = min(ban_secs + 1, 120)
+                        time.sleep(wait)
+                        continue
                     err_str = str(e)
                     if "429" in err_str or "Too Many Requests" in err_str:
                         # Backoff exponencial: 30s → 60s → 120s → 120s (cap)
@@ -1937,11 +2005,22 @@ class MLLiveBotWorker:
                             self.entry_lock = False
 
                 # El gatillo es 15m — polling cada 5s es suficiente
-                time.sleep(5)
+                # Si el IP está baneado, esperar hasta que el ban expire
+                if self._is_banned():
+                    ban_secs = max(0, (self._api_ban_until_ms / 1000) - time.time())
+                    wait = min(ban_secs + 1, 120)  # cap 120s por seguridad
+                    time.sleep(wait)
+                else:
+                    time.sleep(5)
 
             except Exception as e:
-                self.log.error(f"Error ciclo principal: {e}")
-                time.sleep(10)
+                if self._handle_rate_limit_error(e):
+                    ban_secs = max(0, (self._api_ban_until_ms / 1000) - time.time())
+                    wait = min(ban_secs + 1, 120)
+                    time.sleep(wait)
+                else:
+                    self.log.error(f"Error ciclo principal: {e}")
+                    time.sleep(10)
 
     def stop(self):
         self.is_running = False
