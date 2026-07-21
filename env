@@ -1,0 +1,17 @@
+# Copiá este archivo como ".env" (sin ".example") en la raíz del proyecto,
+# junto a live_worker.py / instagram_poster.py / test_instagram.py.
+# Completá tus valores reales ahí. NUNCA subas el ".env" real a git —
+# agregalo a tu .gitignore.
+#
+# Esto es solo para probar en LOCAL. En Railway no se usa este archivo:
+# ahí cargás las mismas claves como variables de entorno del servicio,
+# desde el panel de Railway (Settings → Variables).
+
+INSTAGRAM_ENABLED=true
+IG_ACCESS_TOKEN=EAA46ci7ZCqfkBSCJNui8UlHdrDWJDluZAZA8GfLX8F266CkhI55hCGRZBGYkFqlpuxK7uNsUxiqT70S7PWEIM2zE1ZCm3mC6ZCtM0ryYKz9c6HZChMK5lZAZCrlyI60GCMPj8tmvO1ctV44yRQtsfXJDSnHDTmWG2nD8Rj4GuhBfR8BYseBxe82vk6FLnZCZCxi
+IG_USER_ID=17841442748390571
+IMGBB_API_KEY=65c29757f7b68ae89c41461e1a44c300
+
+# Opcionales
+IG_BACKGROUND_PATH=
+IG_HASHTAGS=
