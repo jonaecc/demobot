@@ -53,9 +53,14 @@ from binance.client import Client
 # Integración opcional con Instagram (ver instagram_poster.py).
 # Si el módulo no está presente o falla al importar, el bot sigue
 # funcionando normalmente — los notificadores quedan como no-ops.
+import sys
+import os
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
 try:
     from instagram_poster import notificar_apertura, notificar_cierre
-except Exception:
+except Exception as e:
+    print(f"⚠️ Aviso: Integración con Instagram deshabilitada por error de importación: {e}")
     def notificar_apertura(**kwargs): pass
     def notificar_cierre(**kwargs): pass
 # SecurityManager eliminado — bot de uso personal
@@ -1303,6 +1308,23 @@ class MLLiveBotWorker:
                         "ts_timeout"   : ts_to,
                     }
                     self.save_internal_state()
+                    
+                    try:
+                        _tp_pct = abs(tp_p - entry_p) / entry_p * 100 if tp_p else None
+                        _sl_pct = abs(sl_p - entry_p) / entry_p * 100 if sl_p else None
+                        self.log.info("📸 Posición abierta detectada al inicio. Notificando a Instagram...")
+                        notificar_apertura(
+                            side=side,
+                            symbol=self.symbol,
+                            entry_price=entry_p,
+                            tp_pct=_tp_pct,
+                            sl_pct=_sl_pct,
+                            leverage=self.leverage,
+                            scenario=None,
+                            log=self.log
+                        )
+                    except Exception as e:
+                        self.log.error(f"Error al intentar notificar posición inicial a Instagram: {e}")
 
                 # ── Re-colocar SL solo si realmente falta ─────────────────
                 # Doble-verificación de posición antes de tocar órdenes.
