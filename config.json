@@ -8,7 +8,7 @@
     "margen_pct": 30,
     "max_pos_size": 15000,
     "factor_tp": 5,
-    "factor_sl": 2.61,
+    "factor_sl": 2.6,
     "tp_fijo_pct": null,
     "use_short": true,
     "demo_mode": true,
