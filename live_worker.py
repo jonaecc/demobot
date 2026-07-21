@@ -1323,6 +1323,7 @@ class MLLiveBotWorker:
                             tp_pct=_tp_pct,
                             sl_pct=_sl_pct,
                             leverage=self.leverage,
+                            timeout_velas=getattr(self, "timeout_velas", None),
                             scenario=None,
                             log=self.log
                         )
@@ -1749,6 +1750,7 @@ class MLLiveBotWorker:
             self.save_internal_state()
             notificar_apertura(side=side, symbol=self.symbol, entry_price=fill_price,
                                 tp_pct=tp_pct, sl_pct=sl_pct, leverage=self.leverage,
+                                timeout_velas=getattr(self, "timeout_velas", None),
                                 scenario=scenario, log=self.log)
             return True
 

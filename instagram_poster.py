@@ -191,7 +191,8 @@ def _fila(draw, y, label, val, W, f_label, f_val, muted, text_color):
 # ══════════════════════════════════════════════════════════════════
 
 def generar_imagen_apertura(symbol, side, entry_price, tp_pct, sl_pct,
-                             leverage, scenario=None, fondo_path=None) -> bytes:
+                             leverage, scenario=None, fondo_path=None,
+                             timeout_velas=None) -> bytes:
     W, H = POST_W, POST_H
     text_color = (245, 247, 250)
     muted      = (168, 176, 186)
@@ -199,7 +200,7 @@ def generar_imagen_apertura(symbol, side, entry_price, tp_pct, sl_pct,
 
     base = _cargar_fondo(fondo_path, W, H) or _fondo_degradado(W, H, accent)
 
-    panel_top, panel_h = 530, 600
+    panel_top, panel_h = 530, 750
     img = _con_overlay_legible(base, panel_top, panel_top + panel_h, W, H)
     draw = ImageDraw.Draw(img)
     draw.rectangle([0, 0, W, 10], fill=accent)   # barra superior de color
@@ -213,7 +214,7 @@ def generar_imagen_apertura(symbol, side, entry_price, tp_pct, sl_pct,
 
     y = 120
     draw.ellipse([90, y + 8, 106, y + 24], fill=accent)
-    draw.text((122, y), "BEHAVIOR BOT · OPERACIÓN ABIERTA", font=f_tag, fill=muted)
+    draw.text((122, y), "BEHAVIOR BOT / OPEN POSITION", font=f_tag, fill=muted)
     y += 66
     draw.text((90, y), symbol, font=f_symbol, fill=text_color)
 
@@ -222,21 +223,21 @@ def generar_imagen_apertura(symbol, side, entry_price, tp_pct, sl_pct,
     _badge(draw, 90, y, direccion, f_badge, fg=(10, 12, 16), bg=accent,
            icono="up" if side == "buy" else "down")
 
-    # Línea promocional (sin emoji: Poppins no trae glifos de emoji)
     draw.ellipse([90, panel_top - 66, 100, panel_top - 56], fill=accent)
-    draw.text((114, panel_top - 72), "Seguí cada apertura y cierre en tiempo real",
+    draw.text((114, panel_top - 72), "Follow every open & close in real time",
                font=f_cta, fill=muted)
 
     y = panel_top + 70
     filas = [
-        ("Entrada",        f"${entry_price:,.4f}"),
-        ("Apalancamiento", f"{leverage}x"),
-        ("Take Profit",    f"+{tp_pct:.2f}%" if tp_pct else "—"),
-        ("Stop Loss",      f"-{sl_pct:.2f}%" if sl_pct else "—"),
+        ("Entry / Entrada",          f"${entry_price:,.4f}"),
+        ("Leverage / Apalancamiento", f"{leverage}x"),
+        ("Take Profit",              f"+{tp_pct:.2f}%" if tp_pct else "--"),
+        ("Stop Loss",                f"-{sl_pct:.2f}%" if sl_pct else "--"),
+        ("Timeout",                  f"{timeout_velas} candles/velas" if timeout_velas else "--"),
     ]
     for label, val in filas:
         _fila(draw, y, label, val, W, f_label, f_val, muted, text_color)
-        y += 130
+        y += 110
 
     ts = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
     draw.text((90, H - 100), ts, font=f_tag, fill=muted)
@@ -475,10 +476,10 @@ def _armar_hashtags(symbol):
 
 
 def post_apertura(side, symbol, entry_price, tp_pct, sl_pct,
-                   leverage, scenario=None, log=None):
+                   leverage, timeout_velas=None, scenario=None, log=None):
     """
-    Publica la apertura de una operación. Nunca lanza excepciones hacia afuera:
-    un fallo acá jamás debe frenar al bot de trading.
+    Publica la apertura de una operacion. Nunca lanza excepciones hacia afuera:
+    un fallo aca jamas debe frenar al bot de trading.
     """
     if not _config_lista():
         return
@@ -488,18 +489,20 @@ def post_apertura(side, symbol, entry_price, tp_pct, sl_pct,
             symbol=symbol, side=side, entry_price=entry_price,
             tp_pct=tp_pct, sl_pct=sl_pct, leverage=leverage, scenario=scenario,
             fondo_path=os.environ.get("IG_BACKGROUND_PATH"),
+            timeout_velas=timeout_velas,
         )
         image_url = _subir_a_imgbb(img_bytes, _env_limpio("IMGBB_API_KEY"))
 
-        direccion = "LONG 📈" if side == "buy" else "SHORT 📉"
-        
+        direccion_en = "LONG" if side == "buy" else "SHORT"
         _tp_str = f"+{tp_pct:.2f}%" if tp_pct is not None else "N/A"
         _sl_str = f"-{sl_pct:.2f}%" if sl_pct is not None else "N/A"
+        _to_str = f"{timeout_velas} candles" if timeout_velas else "N/A"
         caption = (
-            f"Nueva operación abierta por el bot 🤖\n"
-            f"{symbol} — {direccion}\n"
-            f"Entrada: ${entry_price:,.4f}\n"
-            f"TP: {_tp_str} · SL: {_sl_str}\n\n"
+            f"New position opened / Nueva posición abierta\n\n"
+            f"{symbol} -- {direccion_en}\n"
+            f"Entry / Entrada: ${entry_price:,.4f}\n"
+            f"TP: {_tp_str} | SL: {_sl_str}\n"
+            f"Timeout: {_to_str}\n\n"
             f"{_armar_hashtags(symbol)}"
         )
         media_id = _publicar_en_instagram(
@@ -513,8 +516,8 @@ def post_apertura(side, symbol, entry_price, tp_pct, sl_pct,
 def post_cierre(side, symbol, entry_price, exit_price, pnl_usd,
                  scenario=None, log=None):
     """
-    Publica el resultado de una operación cerrada (ganancia o pérdida).
-    Misma filosofía que post_apertura: nunca rompe el bot, correr en un hilo.
+    Publica el resultado de una operacion cerrada (ganancia o perdida).
+    Misma filosofia que post_apertura: nunca rompe el bot, correr en un hilo.
     """
     if not _config_lista():
         return
@@ -527,10 +530,14 @@ def post_cierre(side, symbol, entry_price, exit_price, pnl_usd,
         image_url = _subir_a_imgbb(img_bytes, _env_limpio("IMGBB_API_KEY"))
 
         gano = pnl_usd > 0
+        if gano:
+            header = "Position closed with profit / Operacion cerrada con ganancia"
+        else:
+            header = "Position closed with loss / Operacion cerrada con perdida"
         caption = (
-            f"{'✅ Operación cerrada con ganancia' if gano else '❌ Operación cerrada con pérdida'}\n"
+            f"{header}\n\n"
             f"{symbol}\n"
-            f"Entrada: ${entry_price:,.4f} → Salida: ${exit_price:,.4f}\n"
+            f"Entry / Entrada: ${entry_price:,.4f} -> Exit / Salida: ${exit_price:,.4f}\n"
             f"PnL: ${pnl_usd:+,.2f}\n\n"
             f"{_armar_hashtags(symbol)}"
         )
