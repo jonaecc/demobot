@@ -439,7 +439,15 @@ def diagnosticar_token():
 
 def _log_fn(log, nombre, msg):
     if log:
-        getattr(log, nombre, getattr(log, "info", print))(msg)
+        try:
+            getattr(log, nombre, getattr(log, "info", print))(msg)
+        except (UnicodeEncodeError, UnicodeDecodeError):
+            # Fallback: quitar caracteres no-ASCII para consolas cp1252
+            safe = msg.encode("ascii", errors="replace").decode("ascii")
+            try:
+                getattr(log, nombre, getattr(log, "info", print))(safe)
+            except Exception:
+                print(safe)
 
 
 # Hashtags por defecto — se pueden reemplazar sin tocar código con la
@@ -491,9 +499,9 @@ def post_apertura(side, symbol, entry_price, tp_pct, sl_pct,
         media_id = _publicar_en_instagram(
             _env_limpio("IG_USER_ID"), _env_limpio("IG_ACCESS_TOKEN"), image_url, caption
         )
-        _log_fn(log, "success", f"📸 Apertura publicada en Instagram (media_id={media_id})")
+        _log_fn(log, "success", f"[IG] Apertura publicada en Instagram (media_id={media_id})")
     except Exception as e:
-        _log_fn(log, "warning", f"⚠️ No se pudo publicar apertura en Instagram: {e}")
+        _log_fn(log, "warning", f"[IG] No se pudo publicar apertura en Instagram: {e}")
 
 
 def post_cierre(side, symbol, entry_price, exit_price, pnl_usd,
@@ -523,9 +531,9 @@ def post_cierre(side, symbol, entry_price, exit_price, pnl_usd,
         media_id = _publicar_en_instagram(
             _env_limpio("IG_USER_ID"), _env_limpio("IG_ACCESS_TOKEN"), image_url, caption
         )
-        _log_fn(log, "success", f"📸 Cierre publicado en Instagram (media_id={media_id})")
+        _log_fn(log, "success", f"[IG] Cierre publicado en Instagram (media_id={media_id})")
     except Exception as e:
-        _log_fn(log, "warning", f"⚠️ No se pudo publicar cierre en Instagram: {e}")
+        _log_fn(log, "warning", f"[IG] No se pudo publicar cierre en Instagram: {e}")
 
 
 # ══════════════════════════════════════════════════════════════════

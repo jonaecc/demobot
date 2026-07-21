@@ -58,11 +58,12 @@ import os
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 try:
-    from instagram_poster import notificar_apertura, notificar_cierre
+    from instagram_poster import notificar_apertura, notificar_cierre, post_apertura
 except Exception as e:
-    print(f"⚠️ Aviso: Integración con Instagram deshabilitada por error de importación: {e}")
+    print(f"Aviso: Integracion con Instagram deshabilitada por error de importacion: {e}")
     def notificar_apertura(**kwargs): pass
     def notificar_cierre(**kwargs): pass
+    def post_apertura(**kwargs): pass
 # SecurityManager eliminado — bot de uso personal
 
 
@@ -1310,10 +1311,12 @@ class MLLiveBotWorker:
                     self.save_internal_state()
                     
                     try:
+                        import traceback as _tb
                         _tp_pct = abs(tp_p - entry_p) / entry_p * 100 if tp_p else None
                         _sl_pct = abs(sl_p - entry_p) / entry_p * 100 if sl_p else None
-                        self.log.info("📸 Posición abierta detectada al inicio. Notificando a Instagram...")
-                        notificar_apertura(
+                        self.log.info("Posicion abierta detectada al inicio. Notificando a Instagram...")
+                        self.log.info(f"  symbol={self.symbol} side={side} entry={entry_p} tp_pct={_tp_pct} sl_pct={_sl_pct} lev={self.leverage}")
+                        post_apertura(
                             side=side,
                             symbol=self.symbol,
                             entry_price=entry_p,
@@ -1324,7 +1327,8 @@ class MLLiveBotWorker:
                             log=self.log
                         )
                     except Exception as e:
-                        self.log.error(f"Error al intentar notificar posición inicial a Instagram: {e}")
+                        self.log.error(f"Error Instagram startup: {e}")
+                        self.log.error(_tb.format_exc())
 
                 # ── Re-colocar SL solo si realmente falta ─────────────────
                 # Doble-verificación de posición antes de tocar órdenes.
