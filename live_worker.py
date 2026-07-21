@@ -49,6 +49,15 @@ import json
 from datetime import datetime, timezone
 from pathlib import Path
 from binance.client import Client
+
+# Integración opcional con Instagram (ver instagram_poster.py).
+# Si el módulo no está presente o falla al importar, el bot sigue
+# funcionando normalmente — los notificadores quedan como no-ops.
+try:
+    from instagram_poster import notificar_apertura, notificar_cierre
+except Exception:
+    def notificar_apertura(**kwargs): pass
+    def notificar_cierre(**kwargs): pass
 # SecurityManager eliminado — bot de uso personal
 
 
@@ -1712,6 +1721,9 @@ class MLLiveBotWorker:
             )
             self.log_trade_export("ENTRY", side, filled_qty, fill_price, scenario=scenario)
             self.save_internal_state()
+            notificar_apertura(side=side, symbol=self.symbol, entry_price=fill_price,
+                                tp_pct=tp_pct, sl_pct=sl_pct, leverage=self.leverage,
+                                scenario=scenario, log=self.log)
             return True
 
         except Exception as e:
@@ -1781,6 +1793,9 @@ class MLLiveBotWorker:
                     "EXIT", side, pos["qty"], entry, precio_salida, pnl_neto,
                     scenario=pos.get("scenario")
                 )
+                notificar_cierre(side=side, symbol=self.symbol, entry_price=entry,
+                                  exit_price=precio_salida, pnl_usd=pnl_neto,
+                                  scenario=pos.get("scenario"), log=self.log)
                 self._manage_circuit_breaker()
                 self.posicion_actual = None
                 self.entry_lock      = False
