@@ -465,10 +465,10 @@ def post_apertura(side, symbol, entry_price, tp_pct, sl_pct,
     """
     Publica la apertura de una operación. Nunca lanza excepciones hacia afuera:
     un fallo acá jamás debe frenar al bot de trading.
-    Pensado para llamarse dentro de un hilo (threading.Thread) para no bloquear el loop.
     """
     if not _config_lista():
         return
+
     try:
         img_bytes = generar_imagen_apertura(
             symbol=symbol, side=side, entry_price=entry_price,
@@ -478,11 +478,14 @@ def post_apertura(side, symbol, entry_price, tp_pct, sl_pct,
         image_url = _subir_a_imgbb(img_bytes, _env_limpio("IMGBB_API_KEY"))
 
         direccion = "LONG 📈" if side == "buy" else "SHORT 📉"
+        
+        _tp_str = f"+{tp_pct:.2f}%" if tp_pct is not None else "N/A"
+        _sl_str = f"-{sl_pct:.2f}%" if sl_pct is not None else "N/A"
         caption = (
             f"Nueva operación abierta por el bot 🤖\n"
             f"{symbol} — {direccion}\n"
             f"Entrada: ${entry_price:,.4f}\n"
-            f"TP: +{tp_pct:.2f}% · SL: -{sl_pct:.2f}%\n\n"
+            f"TP: {_tp_str} · SL: {_sl_str}\n\n"
             f"{_armar_hashtags(symbol)}"
         )
         media_id = _publicar_en_instagram(
