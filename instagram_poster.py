@@ -42,9 +42,15 @@ from PIL import Image, ImageDraw, ImageFont, ImageOps
 # NUNCA la pisa — override=False es el comportamiento por defecto de dotenv.
 try:
     from dotenv import load_dotenv
-    load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env"))
+    _dir = os.path.dirname(os.path.abspath(__file__))
+    _dot_env = os.path.join(_dir, ".env")
+    _env     = os.path.join(_dir, "env")
+    if os.path.exists(_dot_env):
+        load_dotenv(_dot_env)
+    elif os.path.exists(_env):
+        load_dotenv(_env)
 except ImportError:
-    pass  # python-dotenv no instalado → seguimos solo con variables de entorno reales
+    pass  # python-dotenv no instalado - seguimos solo con variables de entorno reales
 
 GRAPH_API_VERSION = "v23.0"  # revisar versión vigente en developers.facebook.com
 
