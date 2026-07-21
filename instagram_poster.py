@@ -385,13 +385,27 @@ def _publicar_en_instagram(ig_user_id: str, access_token: str,
         raise RuntimeError(f"Meta rechazó la creación del container ({r1.status_code}): {r1.text}")
     creation_id = r1.json()["id"]
 
-    r2 = requests.post(f"{base}/media_publish", data={
-        "creation_id": creation_id,
-        "access_token": access_token,
-    }, timeout=20)
-    if not r2.ok:
+    import time
+    max_retries = 5
+    for attempt in range(max_retries):
+        r2 = requests.post(f"{base}/media_publish", data={
+            "creation_id": creation_id,
+            "access_token": access_token,
+        }, timeout=20)
+        
+        if r2.ok:
+            return r2.json()["id"]
+            
+        err = r2.json().get("error", {})
+        # 9007 / 2207027 = Media ID is not available (still processing)
+        if err.get("code") == 9007 or err.get("error_subcode") == 2207027:
+            if attempt < max_retries - 1:
+                time.sleep(10)  # Wait 10s before retrying
+                continue
+                
         raise RuntimeError(f"Meta rechazó la publicación del container ({r2.status_code}): {r2.text}")
-    return r2.json()["id"]
+        
+    return None  # Should not be reached
 
 
 # ══════════════════════════════════════════════════════════════════
