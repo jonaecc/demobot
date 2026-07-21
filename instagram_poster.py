@@ -246,7 +246,8 @@ def generar_imagen_apertura(symbol, side, entry_price, tp_pct, sl_pct,
         draw.text((W - 90 - w, H - 100), scenario, font=f_tag, fill=muted)
 
     buf = io.BytesIO()
-    img.save(buf, format="PNG")
+    img = img.convert("RGB")
+    img.save(buf, format="JPEG", quality=92)
     return buf.getvalue()
 
 
@@ -311,7 +312,8 @@ def generar_imagen_cierre(symbol, side, entry_price, exit_price,
         draw.text((W - 90 - w, H - 100), scenario, font=f_tag, fill=muted)
 
     buf = io.BytesIO()
-    img.save(buf, format="PNG")
+    img = img.convert("RGB")
+    img.save(buf, format="JPEG", quality=92)
     return buf.getvalue()
 
 
