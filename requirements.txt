@@ -4,4 +4,6 @@ pandas-ta>=0.4.71b0
 numpy>=2.2.6
 python-binance>=1.0.20
 scipy>=1.13.1
-
+pillow
+requests
+python-dotenv
