@@ -378,12 +378,22 @@ def _publicar_en_instagram(ig_user_id: str, access_token: str,
                             image_url: str, caption: str) -> str:
     base = f"{_elegir_host(access_token)}/{GRAPH_API_VERSION}/{ig_user_id}"
 
-    r1 = requests.post(f"{base}/media", data={
-        "image_url": image_url,
-        "caption": caption,
-        "access_token": access_token,
-    }, timeout=20)
-    if not r1.ok:
+    import time
+    _codigos_transitorios = {2207003, 2207001, 2207032}
+    max_intentos_container = 3
+    r1 = None
+    for intento in range(max_intentos_container):
+        r1 = requests.post(f"{base}/media", data={
+            "image_url": image_url,
+            "caption": caption,
+            "access_token": access_token,
+        }, timeout=20)
+        if r1.ok:
+            break
+        err1 = r1.json().get("error", {})
+        if err1.get("error_subcode") in _codigos_transitorios and intento < max_intentos_container - 1:
+            time.sleep(8)
+            continue
         raise RuntimeError(f"Meta rechazó la creación del container ({r1.status_code}): {r1.text}")
     creation_id = r1.json()["id"]
 
