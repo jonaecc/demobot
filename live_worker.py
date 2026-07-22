@@ -460,6 +460,7 @@ class MLLiveBotWorker:
         self.factor_tp = float(tp)
         self.factor_sl = float(sl)
         self.tp_fijo_pct = kwargs.get("tp_fijo_pct")
+        self.timeout_velas = kwargs.get("timeout_velas", 10)
 
         # ── Behavior + pretrigger ─────────────────────────────────
         self.models_dir   = models_dir
@@ -1323,7 +1324,7 @@ class MLLiveBotWorker:
                             tp_pct=_tp_pct,
                             sl_pct=_sl_pct,
                             leverage=self.leverage,
-                            timeout_velas=getattr(self, "timeout_velas", None),
+                            timeout_velas=getattr(self, "timeout_velas", 10),
                             scenario=None,
                             log=self.log
                         )
@@ -1750,7 +1751,7 @@ class MLLiveBotWorker:
             self.save_internal_state()
             notificar_apertura(side=side, symbol=self.symbol, entry_price=fill_price,
                                 tp_pct=tp_pct, sl_pct=sl_pct, leverage=self.leverage,
-                                timeout_velas=getattr(self, "timeout_velas", None),
+                                timeout_velas=getattr(self, "timeout_velas", 10),
                                 scenario=scenario, log=self.log)
             return True
 
@@ -1912,7 +1913,7 @@ class MLLiveBotWorker:
                         self.max_pos_size = float(self.ui_ref.ent_max.get().replace(",", "."))
                         self.factor_tp    = float(self.ui_ref.ent_tp.get().replace(",", "."))
                         self.factor_sl    = float(self.ui_ref.ent_sl.get().replace(",", "."))
-                        self.timeout_velas = int(float(self.ui_ref.ent_timeout.get())) if hasattr(self.ui_ref, "ent_timeout") else 10
+                        self.timeout_velas = int(float(self.ui_ref.ent_timeout.get())) if hasattr(self.ui_ref, "ent_timeout") else getattr(self, "timeout_velas", 10)
 
                         if new_lev != self.leverage:
                             self.leverage = new_lev
