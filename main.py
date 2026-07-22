@@ -167,6 +167,7 @@ def main():
         use_short      = cfg.get("use_short", True),
         demo_mode      = cfg.get("demo_mode", False),
         tp_fijo_pct    = cfg.get("tp_fijo_pct"),
+        timeout_velas  = cfg.get("timeout_velas", 10),
         ui_ref         = ui_ref,
     )
 
