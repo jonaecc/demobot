@@ -483,6 +483,8 @@ class MLLiveBotWorker:
         self.max_consecutive_losses = 6
         self.daily_pnl              = 0.0
         self.loss_streak            = 0
+        self.last_position_check    = 0.0
+        self.position_check_interval = 15   # segundos de throttle para consultas a la API
         self.is_paused              = False
         self.is_running             = False
         self.max_balance_historico  = 0.0
@@ -836,6 +838,11 @@ class MLLiveBotWorker:
     DEMO_FAPI_WS_URL   = "wss://demo-fstream.binance.com"
 
     def resync_session(self):
+        if self._is_banned():
+            ban_secs = max(0, (self._api_ban_until_ms / 1000) - time.time())
+            self.log.warning(f"🚫 IP baneada — esperando {ban_secs:.0f}s antes de resync.")
+            time.sleep(min(ban_secs + 1, 120))
+
         try:
             self.exchange = ccxt.binanceusdm({
                 "apiKey"         : self.api_key,
@@ -914,28 +921,32 @@ class MLLiveBotWorker:
                                 f"⚠️ Hedge Mode = {self._hedge_mode} "
                                 f"(no se pudo forzar One-way con posición abierta)"
                             )
-                        except Exception:
-                            pass
+                        except Exception as e2:
+                            if not self._handle_rate_limit_error(e2):
+                                pass
             else:
                 # Con posición abierta no intentamos cambiar el modo,
                 # pero necesitamos saber en cuál estamos
                 try:
                     pm = self.client._request_futures_api('get', 'positionSide/dual', True)
                     self._hedge_mode = bool(pm.get("dualSidePosition", False))
-                except Exception:
-                    pass
+                except Exception as e:
+                    if not self._handle_rate_limit_error(e):
+                        pass
 
             try:
                 self.client.futures_change_margin_type(symbol=symbol_clean, marginType="ISOLATED")
-            except Exception:
-                pass
+            except Exception as e:
+                if not self._handle_rate_limit_error(e):
+                    pass
 
             try:
                 self.client.futures_change_leverage(symbol=symbol_clean, leverage=self.leverage)
                 self.log.info(f"⚙️ Leverage: {self.leverage}x")
             except Exception as e:
-                if "-4161" not in str(e):
-                    self.log.warning(f"Leverage: {e}")
+                if not self._handle_rate_limit_error(e):
+                    if "-4161" not in str(e):
+                        self.log.warning(f"Leverage: {e}")
 
             balance_data = self.client.futures_account_balance()
             total_usdt   = next((float(b["balance"]) for b in balance_data if b["asset"] == "USDT"), 0.0)
@@ -1788,6 +1799,12 @@ class MLLiveBotWorker:
                     pos["max_alcanzado"] = float(r15["current"]["low"])
 
             # 1. Verificar si la posición sigue abierta en el exchange
+            # Implementamos throttle para evitar saturar la API
+            now = time.time()
+            if now - self.last_position_check < self.position_check_interval:
+                return  # No consultamos todavía, retenemos el estado conocido
+            
+            self.last_position_check = now
             symbol_clean = self.get_clean_symbol()
             pos_info     = self.client.futures_position_information(symbol=symbol_clean)
             active_pos   = next((p for p in pos_info if float(p["positionAmt"]) != 0), None)
