@@ -7,7 +7,7 @@
     "leverage": 15,
     "margen_pct": 30,
     "max_pos_size": 15000,
-    "factor_tp": 5,
+    "factor_tp": 6.09,
     "factor_sl": 2.61,
     "tp_fijo_pct": null,
     "use_short": true,
@@ -17,5 +17,5 @@
     "log_level": "INFO",
     "max_reinicios": 10,
     "espera_reinicio_seg": 60,
-    "timeout_velas": 12
+    "timeout_velas": 19
 }
