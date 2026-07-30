@@ -17,5 +17,5 @@
     "log_level": "INFO",
     "max_reinicios": 10,
     "espera_reinicio_seg": 60,
-    "timeout_velas": 15
+    "timeout_velas": 11
 }
