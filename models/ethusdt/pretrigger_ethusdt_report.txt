@@ -3,11 +3,11 @@
   Señales anticipatorias por escenario
 ═════════════════════════════════════════════════════════════════
 
-Escenarios con condiciones identificadas: 212
-Escenarios sin condición suficiente:      3
+Escenarios con condiciones identificadas: 211
+Escenarios sin condición suficiente:      4
 
 Sin condiciones anticipatorias confiables:
-  T1__DD_DD_DU, T1__DD_UD_DD, T1__UD_DD_UU
+  T1__DD_DD_DU, T1__DD_UD_DD, T1__UD_DD_UU, T2__UU_UD_DD
   → Operar solo cuando el gatillo ya se disparó.
      Puede deberse a que el setup no tiene condiciones previas
      diferenciadas, o a muestra insuficiente.
@@ -46,22 +46,6 @@ Sin condiciones anticipatorias confiables:
 
 ─────────────────────────────────────────────────────────────────
 
-▶  T4__UD_UU_UU  —  VENTA (SHORT)
-   Gatillo: Continuación bajista (SQZ↓ + ADX↓)
-   Contexto: 1D=UD (tendencia activa, momentum frenando) · 4H=UU (tendencia con momentum creciente) · 1H=UU (tendencia con momentum creciente)
-   Casos: 103  |  Tasa base: 46%
-
-   Condición 1: Volatilidad de las 10 velas 15m previas mayor que 0.4555%
-   → Tasa: 82%  (lift 1.80×, p=0.001, n=17, cobertura=16%) ⚠ cobertura baja
-
-   Condición 2: Precio al menos 0.64% por encima de EMA20 15m
-   → Tasa: 67%  (lift 1.46×, p=0.096, n=15, cobertura=15%) ⚠ cobertura baja
-
-   Condición 3: Precio al menos 4.93% por encima de EMA55 1H
-   → Tasa: 67%  (lift 1.46×, p=0.096, n=15, cobertura=15%) ⚠ cobertura baja
-
-─────────────────────────────────────────────────────────────────
-
 ▶  T3__DU_DU_DD  —  COMPRA (LONG)
    Gatillo: Agotamiento de impulso (ADX↑ + SQZ↓)
    Contexto: 1D=DU (fuerza sin dirección, momentum activo) · 4H=DU (fuerza sin dirección, momentum activo) · 1H=DD (sin dirección ni momentum)
@@ -91,22 +75,6 @@ Sin condiciones anticipatorias confiables:
 
    Condición 3: SQZ 15m girando al alza (dir ≥ -0.237) — momentum recuperándose
    → Tasa: 62%  (lift 1.49×, p=0.092, n=16, cobertura=19%) ⚠ cobertura baja
-
-─────────────────────────────────────────────────────────────────
-
-▶  T3__DD_UU_DU  —  VENTA (SHORT)
-   Gatillo: Agotamiento de impulso (ADX↑ + SQZ↓)
-   Contexto: 1D=DD (sin dirección ni momentum) · 4H=UU (tendencia con momentum creciente) · 1H=DU (fuerza sin dirección, momentum activo)
-   Casos: 133  |  Tasa base: 49%
-
-   Condición 1: Volatilidad 15m elevada (ATR norm ≥ 0.0065) — expansión de rango
-   → Tasa: 88%  (lift 1.79×, p=0.001, n=16, cobertura=12%) ⚠ cobertura baja
-
-   Condición 2: Precio al menos 6.29% por debajo de EMA55 4H
-   → Tasa: 75%  (lift 1.53×, p=0.033, n=16, cobertura=12%) ⚠ cobertura baja
-
-   Condición 3: Precio al menos 14.89% por encima de EMA55 1D
-   → Tasa: 75%  (lift 1.53×, p=0.033, n=16, cobertura=12%) ⚠ cobertura baja
 
 ─────────────────────────────────────────────────────────────────
 
@@ -209,44 +177,6 @@ Sin condiciones anticipatorias confiables:
      · ADX 1H menor que 26.9
      · ADX 15m ≤ 29.5 — mercado sin fuerza de tendencia
    → Tasa combinada: 87%  (lift 1.73×, n=15, cobertura=30%)
-
-─────────────────────────────────────────────────────────────────
-
-▶  T1__DU_DD_DD  —  COMPRA (LONG)
-   Gatillo: Reversión (SQZ↑ + ADX↓)
-   Contexto: 1D=DU (fuerza sin dirección, momentum activo) · 4H=DD (sin dirección ni momentum) · 1H=DD (sin dirección ni momentum)
-   Casos: 59  |  Tasa base: 39%
-
-   Condición 1: Las 10 velas 15m previas cayeron ≥ 0.24% — sesgo bajista
-   → Tasa: 67%  (lift 1.71×, p=0.015, n=15, cobertura=25%)
-
-   Condición 2: ADX 1D menor que 20.5
-   → Tasa: 65%  (lift 1.66×, p=0.017, n=17, cobertura=29%)
-
-   Condición 3: ADX 1H menor que 16.5
-   → Tasa: 61%  (lift 1.57×, p=0.041, n=18, cobertura=30%)
-
-─────────────────────────────────────────────────────────────────
-
-▶  T4__DD_DD_DD  —  COMPRA (LONG)
-   Gatillo: Continuación bajista (SQZ↓ + ADX↓)
-   Contexto: 1D=DD (sin dirección ni momentum) · 4H=DD (sin dirección ni momentum) · 1H=DD (sin dirección ni momentum)
-   Casos: 77  |  Tasa base: 44%
-
-   Condición 1: SQZ 15m girando al alza (dir ≥ -0.797) — momentum recuperándose
-   → Tasa: 59%  (lift 1.34×, p=0.011, n=39, cobertura=51%)
-
-   Condición 2: SQZ Momentum 4H mayor que -5.3
-   → Tasa: 54%  (lift 1.22×, p=0.109, n=39, cobertura=51%)
-
-   Condición 3: Rango de las 10 velas 15m previas menor que 1.28%
-   → Tasa: 52%  (lift 1.18×, p=0.111, n=44, cobertura=57%)
-
-   SETUP COMPLETO (AND de 3 condiciones):
-     · SQZ 15m girando al alza (dir ≥ -0.797) — momentum recuperándose
-     · SQZ Momentum 4H mayor que -5.3
-     · Rango de las 10 velas 15m previas menor que 1.28%
-   → Tasa combinada: 75%  (lift 1.70×, n=16, cobertura=21%) ⚠ cobertura baja
 
 ─────────────────────────────────────────────────────────────────
 
@@ -458,6 +388,22 @@ Sin condiciones anticipatorias confiables:
 
 ─────────────────────────────────────────────────────────────────
 
+▶  T2__UU_DD_DU  —  COMPRA (LONG)
+   Gatillo: Impulso confirmado (ADX↑ + SQZ↑)
+   Contexto: 1D=UU (tendencia con momentum creciente) · 4H=DD (sin dirección ni momentum) · 1H=DU (fuerza sin dirección, momentum activo)
+   Casos: 98  |  Tasa base: 49%
+
+   Condición 1: Distancia a EMA55 1D menor que 4.04%
+   → Tasa: 81%  (lift 1.65×, p=0.001, n=21, cobertura=22%) ⚠ cobertura baja
+
+   Condición 2: Precio al menos 1.35% por encima de EMA55 15m — extensión alcista
+   → Tasa: 75%  (lift 1.53×, p=0.029, n=16, cobertura=16%) ⚠ cobertura baja
+
+   Condición 3: Volatilidad de las 10 velas 15m previas mayor que 0.3692%
+   → Tasa: 75%  (lift 1.53×, p=0.029, n=16, cobertura=16%) ⚠ cobertura baja
+
+─────────────────────────────────────────────────────────────────
+
 ▶  T2__UU_DD_DD  —  COMPRA (LONG)
    Gatillo: Impulso confirmado (ADX↑ + SQZ↑)
    Contexto: 1D=UU (tendencia con momentum creciente) · 4H=DD (sin dirección ni momentum) · 1H=DD (sin dirección ni momentum)
@@ -490,54 +436,6 @@ Sin condiciones anticipatorias confiables:
 
 ─────────────────────────────────────────────────────────────────
 
-▶  T3__UD_DD_DD  —  VENTA (SHORT)
-   Gatillo: Agotamiento de impulso (ADX↑ + SQZ↓)
-   Contexto: 1D=UD (tendencia activa, momentum frenando) · 4H=DD (sin dirección ni momentum) · 1H=DD (sin dirección ni momentum)
-   Casos: 95  |  Tasa base: 48%
-
-   Condición 1: ADX 1H menor que 15.0
-   → Tasa: 80%  (lift 1.65×, p=0.010, n=15, cobertura=16%) ⚠ cobertura baja
-
-   Condición 2: Precio al menos 3.70% por encima de EMA55 4H
-   → Tasa: 80%  (lift 1.65×, p=0.010, n=15, cobertura=16%) ⚠ cobertura baja
-
-   Condición 3: SQZ 15m negativo por debajo de -15.2 — momentum bajista dominante
-   → Tasa: 70%  (lift 1.45×, p=0.043, n=20, cobertura=21%) ⚠ cobertura baja
-
-─────────────────────────────────────────────────────────────────
-
-▶  T4__DU_UD_DU  —  VENTA (SHORT)
-   Gatillo: Continuación bajista (SQZ↓ + ADX↓)
-   Contexto: 1D=DU (fuerza sin dirección, momentum activo) · 4H=UD (tendencia activa, momentum frenando) · 1H=DU (fuerza sin dirección, momentum activo)
-   Casos: 132  |  Tasa base: 46%
-
-   Condición 1: SQZ 15m positivo por encima de 29.4 — momentum alcista activo
-   → Tasa: 75%  (lift 1.65×, p=0.015, n=16, cobertura=12%) ⚠ cobertura baja
-
-   Condición 2: SQZ 1H positivo (> 17.1) — contexto alcista 1H
-   → Tasa: 75%  (lift 1.65×, p=0.015, n=16, cobertura=12%) ⚠ cobertura baja
-
-   Condición 3: Precio al menos 4.62% por debajo de EMA55 4H
-   → Tasa: 73%  (lift 1.61×, p=0.028, n=15, cobertura=11%) ⚠ cobertura baja
-
-─────────────────────────────────────────────────────────────────
-
-▶  T4__UU_DU_DU  —  VENTA (SHORT)
-   Gatillo: Continuación bajista (SQZ↓ + ADX↓)
-   Contexto: 1D=UU (tendencia con momentum creciente) · 4H=DU (fuerza sin dirección, momentum activo) · 1H=DU (fuerza sin dirección, momentum activo)
-   Casos: 118  |  Tasa base: 45%
-
-   Condición 1: ADX 1H mayor que 29.0
-   → Tasa: 74%  (lift 1.64×, p=0.010, n=19, cobertura=16%) ⚠ cobertura baja
-
-   Condición 2: SQZ 15m negativo por debajo de -1.1 — momentum bajista dominante
-   → Tasa: 73%  (lift 1.63×, p=0.025, n=15, cobertura=13%) ⚠ cobertura baja
-
-   Condición 3: Pendiente ADX 15m mayor que -0.132
-   → Tasa: 67%  (lift 1.48×, p=0.096, n=15, cobertura=13%) ⚠ cobertura baja
-
-─────────────────────────────────────────────────────────────────
-
 ▶  T3__DU_UD_UD  —  COMPRA (LONG)
    Gatillo: Agotamiento de impulso (ADX↑ + SQZ↓)
    Contexto: 1D=DU (fuerza sin dirección, momentum activo) · 4H=UD (tendencia activa, momentum frenando) · 1H=UD (tendencia activa, momentum frenando)
@@ -554,22 +452,6 @@ Sin condiciones anticipatorias confiables:
 
 ─────────────────────────────────────────────────────────────────
 
-▶  T3__DD_DD_DU  —  VENTA (SHORT)
-   Gatillo: Agotamiento de impulso (ADX↑ + SQZ↓)
-   Contexto: 1D=DD (sin dirección ni momentum) · 4H=DD (sin dirección ni momentum) · 1H=DU (fuerza sin dirección, momentum activo)
-   Casos: 172  |  Tasa base: 52%
-
-   Condición 1: Pendiente ADX 1H mayor que -0.199
-   → Tasa: 86%  (lift 1.64×, p=0.001, n=21, cobertura=12%) ⚠ cobertura baja
-
-   Condición 2: Precio al menos 1.31% por encima de EMA55 4H
-   → Tasa: 78%  (lift 1.49×, p=0.002, n=32, cobertura=19%) ⚠ cobertura baja
-
-   Condición 3: ADX 4H mayor que 29.0
-   → Tasa: 78%  (lift 1.49×, p=0.026, n=18, cobertura=10%) ⚠ cobertura baja
-
-─────────────────────────────────────────────────────────────────
-
 ▶  T3__DU_UU_UD  —  VENTA (SHORT)
    Gatillo: Agotamiento de impulso (ADX↑ + SQZ↓)
    Contexto: 1D=DU (fuerza sin dirección, momentum activo) · 4H=UU (tendencia con momentum creciente) · 1H=UD (tendencia activa, momentum frenando)
@@ -583,38 +465,6 @@ Sin condiciones anticipatorias confiables:
 
    Condición 3: ADX 15m desacelerando (accel ≤ -0.485)
    → Tasa: 73%  (lift 1.49×, p=0.014, n=22, cobertura=24%) ⚠ cobertura baja
-
-─────────────────────────────────────────────────────────────────
-
-▶  T2__DU_UD_DD  —  VENTA (SHORT)
-   Gatillo: Impulso confirmado (ADX↑ + SQZ↑)
-   Contexto: 1D=DU (fuerza sin dirección, momentum activo) · 4H=UD (tendencia activa, momentum frenando) · 1H=DD (sin dirección ni momentum)
-   Casos: 29  |  Tasa base: 45%
-
-   Condición 1: DI+ sobre DI− por ≥ 3.8 pts en 15m — presión alcista
-   → Tasa: 73%  (lift 1.64×, p=0.003, n=15, cobertura=52%)
-
-   Condición 2: SQZ 15m mayor que -4.2
-   → Tasa: 71%  (lift 1.57×, p=0.002, n=17, cobertura=59%)
-
-   Condición 3: Precio cerca de EMA55 15m (dist mayor que -0.00%)
-   → Tasa: 60%  (lift 1.34×, p=0.020, n=20, cobertura=69%)
-
-─────────────────────────────────────────────────────────────────
-
-▶  T1__DU_DD_DU  —  COMPRA (LONG)
-   Gatillo: Reversión (SQZ↑ + ADX↓)
-   Contexto: 1D=DU (fuerza sin dirección, momentum activo) · 4H=DD (sin dirección ni momentum) · 1H=DU (fuerza sin dirección, momentum activo)
-   Casos: 38  |  Tasa base: 37%
-
-   Condición 1: RSI 15m ≤ 52 — sobreventa relativa
-   → Tasa: 60%  (lift 1.63×, p=0.037, n=15, cobertura=40%)
-
-   Condición 2: ADX 1H mayor que 24.0
-   → Tasa: 56%  (lift 1.53×, p=0.047, n=16, cobertura=42%)
-
-   Condición 3: SQZ 1H negativo (< -10.6) — contexto bajista 1H
-   → Tasa: 53%  (lift 1.43×, p=0.091, n=19, cobertura=50%)
 
 ─────────────────────────────────────────────────────────────────
 
@@ -666,19 +516,19 @@ Sin condiciones anticipatorias confiables:
 
 ─────────────────────────────────────────────────────────────────
 
-▶  T2__DU_UU_UU  —  VENTA (SHORT)
-   Gatillo: Impulso confirmado (ADX↑ + SQZ↑)
-   Contexto: 1D=DU (fuerza sin dirección, momentum activo) · 4H=UU (tendencia con momentum creciente) · 1H=UU (tendencia con momentum creciente)
-   Casos: 46  |  Tasa base: 46%
+▶  T3__UU_DD_UU  —  COMPRA (LONG)
+   Gatillo: Agotamiento de impulso (ADX↑ + SQZ↓)
+   Contexto: 1D=UU (tendencia con momentum creciente) · 4H=DD (sin dirección ni momentum) · 1H=UU (tendencia con momentum creciente)
+   Casos: 197  |  Tasa base: 53%
 
-   Condición 1: ADX 15m desacelerando (accel ≤ 0.611)
-   → Tasa: 73%  (lift 1.61×, p=0.013, n=15, cobertura=33%)
+   Condición 1: SQZ Momentum 4H mayor que 134.3
+   → Tasa: 85%  (lift 1.61×, p=0.004, n=20, cobertura=10%) ⚠ cobertura baja
 
-   Condición 2: Pendiente ADX 1H menor que 0.815
-   → Tasa: 73%  (lift 1.61×, p=0.013, n=15, cobertura=33%)
+   Condición 2: SQZ 1H positivo (> 44.6) — contexto alcista 1H
+   → Tasa: 78%  (lift 1.48×, p=0.013, n=23, cobertura=12%) ⚠ cobertura baja
 
-   Condición 3: ADX 1D mayor que 29.1
-   → Tasa: 73%  (lift 1.61×, p=0.013, n=15, cobertura=33%)
+   Condición 3: ADX 1H acelerando (pendiente ≥ 1.883)
+   → Tasa: 75%  (lift 1.42×, p=0.057, n=20, cobertura=10%) ⚠ cobertura baja
 
 ─────────────────────────────────────────────────────────────────
 
@@ -775,6 +625,22 @@ Sin condiciones anticipatorias confiables:
 
    Condición 3: ADX 4H mayor que 33.9
    → Tasa: 74%  (lift 1.51×, p=0.003, n=19, cobertura=51%)
+
+─────────────────────────────────────────────────────────────────
+
+▶  T3__DD_UD_DU  —  COMPRA (LONG)
+   Gatillo: Agotamiento de impulso (ADX↑ + SQZ↓)
+   Contexto: 1D=DD (sin dirección ni momentum) · 4H=UD (tendencia activa, momentum frenando) · 1H=DU (fuerza sin dirección, momentum activo)
+   Casos: 178  |  Tasa base: 49%
+
+   Condición 1: ADX 1H menor que 19.4
+   → Tasa: 79%  (lift 1.60×, p=0.007, n=19, cobertura=11%) ⚠ cobertura baja
+
+   Condición 2: SQZ 15m girando al alza (dir ≥ -0.048) — momentum recuperándose
+   → Tasa: 72%  (lift 1.46×, p=0.049, n=18, cobertura=10%) ⚠ cobertura baja
+
+   Condición 3: ADX 15m desacelerando (accel ≤ -0.544)
+   → Tasa: 67%  (lift 1.35×, p=0.034, n=33, cobertura=18%) ⚠ cobertura baja
 
 ─────────────────────────────────────────────────────────────────
 
@@ -970,19 +836,19 @@ Sin condiciones anticipatorias confiables:
 
 ─────────────────────────────────────────────────────────────────
 
-▶  T4__DD_DD_DU  —  COMPRA (LONG)
-   Gatillo: Continuación bajista (SQZ↓ + ADX↓)
+▶  T3__DD_DD_DU  —  COMPRA (LONG)
+   Gatillo: Agotamiento de impulso (ADX↑ + SQZ↓)
    Contexto: 1D=DD (sin dirección ni momentum) · 4H=DD (sin dirección ni momentum) · 1H=DU (fuerza sin dirección, momentum activo)
-   Casos: 215  |  Tasa base: 47%
+   Casos: 172  |  Tasa base: 48%
 
-   Condición 1: ADX 1D mayor que 38.5
-   → Tasa: 73%  (lift 1.55×, p=0.003, n=30, cobertura=14%) ⚠ cobertura baja
+   Condición 1: ADX 4H menor que 13.9
+   → Tasa: 74%  (lift 1.55×, p=0.026, n=19, cobertura=11%) ⚠ cobertura baja
 
-   Condición 2: ADX 15m frenando (pendiente ≤ -1.111) — agotamiento de tendencia
-   → Tasa: 73%  (lift 1.53×, p=0.014, n=22, cobertura=10%) ⚠ cobertura baja
+   Condición 2: SQZ Momentum 4H mayor que 42.2
+   → Tasa: 68%  (lift 1.44×, p=0.086, n=19, cobertura=11%) ⚠ cobertura baja
 
-   Condición 3: Volatilidad de las 10 velas 15m previas menor que 0.1166%
-   → Tasa: 73%  (lift 1.53×, p=0.014, n=22, cobertura=10%) ⚠ cobertura baja
+   Condición 3: SQZ 1H negativo (< -23.5) — contexto bajista 1H
+   → Tasa: 68%  (lift 1.43×, p=0.032, n=25, cobertura=14%) ⚠ cobertura baja
 
 ─────────────────────────────────────────────────────────────────
 
@@ -1015,6 +881,22 @@ Sin condiciones anticipatorias confiables:
 
    Condición 3: Spread DI+−DI− 15m menor que 11.1
    → Tasa: 70%  (lift 1.30×, p=0.081, n=30, cobertura=10%) ⚠ cobertura baja
+
+─────────────────────────────────────────────────────────────────
+
+▶  T4__DU_UD_DU  —  COMPRA (LONG)
+   Gatillo: Continuación bajista (SQZ↓ + ADX↓)
+   Contexto: 1D=DU (fuerza sin dirección, momentum activo) · 4H=UD (tendencia activa, momentum frenando) · 1H=DU (fuerza sin dirección, momentum activo)
+   Casos: 132  |  Tasa base: 55%
+
+   Condición 1: Rango de las 10 velas 15m previas menor que 0.53%
+   → Tasa: 84%  (lift 1.54×, p=0.006, n=19, cobertura=14%) ⚠ cobertura baja
+
+   Condición 2: ADX 15m desacelerando (accel ≤ -1.498)
+   → Tasa: 75%  (lift 1.38×, p=0.109, n=16, cobertura=12%) ⚠ cobertura baja
+
+   Condición 3: ADX 4H menor que 16.3
+   → Tasa: 75%  (lift 1.38×, p=0.109, n=16, cobertura=12%) ⚠ cobertura baja
 
 ─────────────────────────────────────────────────────────────────
 
@@ -1066,6 +948,22 @@ Sin condiciones anticipatorias confiables:
 
 ─────────────────────────────────────────────────────────────────
 
+▶  T4__UD_DD_DU  —  COMPRA (LONG)
+   Gatillo: Continuación bajista (SQZ↓ + ADX↓)
+   Contexto: 1D=UD (tendencia activa, momentum frenando) · 4H=DD (sin dirección ni momentum) · 1H=DU (fuerza sin dirección, momentum activo)
+   Casos: 170  |  Tasa base: 54%
+
+   Condición 1: SQZ 1H positivo (> 42.8) — contexto alcista 1H
+   → Tasa: 82%  (lift 1.54×, p=0.019, n=17, cobertura=10%) ⚠ cobertura baja
+
+   Condición 2: SQZ 15m positivo por encima de 21.7 — momentum alcista activo
+   → Tasa: 71%  (lift 1.33×, p=0.045, n=31, cobertura=18%) ⚠ cobertura baja
+
+   Condición 3: RSI 1H ≥ 57
+   → Tasa: 68%  (lift 1.27×, p=0.110, n=31, cobertura=18%) ⚠ cobertura baja
+
+─────────────────────────────────────────────────────────────────
+
 ▶  T1__DD_UD_UU  —  COMPRA (LONG)
    Gatillo: Reversión (SQZ↑ + ADX↓)
    Contexto: 1D=DD (sin dirección ni momentum) · 4H=UD (tendencia activa, momentum frenando) · 1H=UU (tendencia con momentum creciente)
@@ -1082,19 +980,19 @@ Sin condiciones anticipatorias confiables:
 
 ─────────────────────────────────────────────────────────────────
 
-▶  T1__UD_DD_DD  —  VENTA (SHORT)
-   Gatillo: Reversión (SQZ↑ + ADX↓)
+▶  T3__UD_DD_DD  —  COMPRA (LONG)
+   Gatillo: Agotamiento de impulso (ADX↑ + SQZ↓)
    Contexto: 1D=UD (tendencia activa, momentum frenando) · 4H=DD (sin dirección ni momentum) · 1H=DD (sin dirección ni momentum)
-   Casos: 23  |  Tasa base: 48%
+   Casos: 95  |  Tasa base: 52%
 
-   Condición 1: ADX 4H mayor que 21.3
-   → Tasa: 73%  (lift 1.53×, p=0.001, n=15, cobertura=65%)
+   Condición 1: RSI 1H ≤ 44
+   → Tasa: 79%  (lift 1.53×, p=0.002, n=24, cobertura=25%)
 
-   Condición 2: ADX 1H mayor que 17.4
-   → Tasa: 62%  (lift 1.31×, p=0.069, n=16, cobertura=70%)
+   Condición 2: ADX 1D mayor que 43.6
+   → Tasa: 71%  (lift 1.37×, p=0.110, n=17, cobertura=18%) ⚠ cobertura baja
 
-   Condición 3: SQZ Momentum 4H mayor que -17.7
-   → Tasa: 62%  (lift 1.31×, p=0.069, n=16, cobertura=70%)
+   Condición 3: ADX 4H menor que 25.2
+   → Tasa: 65%  (lift 1.25×, p=0.014, n=48, cobertura=50%)
 
 ─────────────────────────────────────────────────────────────────
 
@@ -1242,22 +1140,6 @@ Sin condiciones anticipatorias confiables:
 
 ─────────────────────────────────────────────────────────────────
 
-▶  T4__UD_DD_DU  —  VENTA (SHORT)
-   Gatillo: Continuación bajista (SQZ↓ + ADX↓)
-   Contexto: 1D=UD (tendencia activa, momentum frenando) · 4H=DD (sin dirección ni momentum) · 1H=DU (fuerza sin dirección, momentum activo)
-   Casos: 170  |  Tasa base: 46%
-
-   Condición 1: Pendiente ADX 1H mayor que -0.151
-   → Tasa: 71%  (lift 1.52×, p=0.042, n=17, cobertura=10%) ⚠ cobertura baja
-
-   Condición 2: ADX 1H menor que 16.0
-   → Tasa: 64%  (lift 1.38×, p=0.061, n=28, cobertura=16%) ⚠ cobertura baja
-
-   Condición 3: Volatilidad 15m baja (ATR norm ≤ 0.0032) — mercado comprimido
-   → Tasa: 62%  (lift 1.32×, p=0.012, n=52, cobertura=31%)
-
-─────────────────────────────────────────────────────────────────
-
 ▶  T1__DD_UD_UD  —  COMPRA (LONG)
    Gatillo: Reversión (SQZ↑ + ADX↓)
    Contexto: 1D=DD (sin dirección ni momentum) · 4H=UD (tendencia activa, momentum frenando) · 1H=UD (tendencia activa, momentum frenando)
@@ -1287,22 +1169,6 @@ Sin condiciones anticipatorias confiables:
 
    Condición 3: ADX 1D menor que 18.0
    → Tasa: 70%  (lift 1.38×, p=0.093, n=20, cobertura=12%) ⚠ cobertura baja
-
-─────────────────────────────────────────────────────────────────
-
-▶  T4__DD_UD_DD  —  COMPRA (LONG)
-   Gatillo: Continuación bajista (SQZ↓ + ADX↓)
-   Contexto: 1D=DD (sin dirección ni momentum) · 4H=UD (tendencia activa, momentum frenando) · 1H=DD (sin dirección ni momentum)
-   Casos: 46  |  Tasa base: 46%
-
-   Condición 1: ADX 1H mayor que 27.7
-   → Tasa: 69%  (lift 1.51×, p=0.031, n=16, cobertura=35%)
-
-   Condición 2: SQZ Momentum 4H menor que -14.4
-   → Tasa: 69%  (lift 1.51×, p=0.031, n=16, cobertura=35%)
-
-   Condición 3: ADX 4H mayor que 24.7
-   → Tasa: 68%  (lift 1.49×, p=0.007, n=22, cobertura=48%)
 
 ─────────────────────────────────────────────────────────────────
 
@@ -1354,6 +1220,22 @@ Sin condiciones anticipatorias confiables:
 
 ─────────────────────────────────────────────────────────────────
 
+▶  T3__DD_DU_UD  —  COMPRA (LONG)
+   Gatillo: Agotamiento de impulso (ADX↑ + SQZ↓)
+   Contexto: 1D=DD (sin dirección ni momentum) · 4H=DU (fuerza sin dirección, momentum activo) · 1H=UD (tendencia activa, momentum frenando)
+   Casos: 123  |  Tasa base: 49%
+
+   Condición 1: Volatilidad de las 10 velas 15m previas mayor que 0.4990%
+   → Tasa: 73%  (lift 1.50×, p=0.055, n=15, cobertura=12%) ⚠ cobertura baja
+
+   Condición 2: SQZ 15m positivo por encima de 9.8 — momentum alcista activo
+   → Tasa: 65%  (lift 1.34×, p=0.106, n=23, cobertura=19%) ⚠ cobertura baja
+
+   Condición 3: ADX 1D mayor que 37.5
+   → Tasa: 64%  (lift 1.32×, p=0.085, n=28, cobertura=23%) ⚠ cobertura baja
+
+─────────────────────────────────────────────────────────────────
+
 ▶  T1__DD_DD_UD  —  VENTA (SHORT)
    Gatillo: Reversión (SQZ↑ + ADX↓)
    Contexto: 1D=DD (sin dirección ni momentum) · 4H=DD (sin dirección ni momentum) · 1H=UD (tendencia activa, momentum frenando)
@@ -1383,22 +1265,6 @@ Sin condiciones anticipatorias confiables:
 
    Condición 3: ADX 1D menor que 23.1
    → Tasa: 75%  (lift 1.50×, p=0.000, n=48, cobertura=36%)
-
-─────────────────────────────────────────────────────────────────
-
-▶  T3__UU_DD_UU  —  VENTA (SHORT)
-   Gatillo: Agotamiento de impulso (ADX↑ + SQZ↓)
-   Contexto: 1D=UU (tendencia con momentum creciente) · 4H=DD (sin dirección ni momentum) · 1H=UU (tendencia con momentum creciente)
-   Casos: 197  |  Tasa base: 47%
-
-   Condición 1: Volatilidad 15m elevada (ATR norm ≥ 0.0078) — expansión de rango
-   → Tasa: 71%  (lift 1.50×, p=0.016, n=24, cobertura=12%) ⚠ cobertura baja
-
-   Condición 2: ADX 4H menor que 18.5
-   → Tasa: 65%  (lift 1.38×, p=0.103, n=20, cobertura=10%) ⚠ cobertura baja
-
-   Condición 3: ADX 1D menor que 22.3
-   → Tasa: 62%  (lift 1.32×, p=0.020, n=48, cobertura=24%) ⚠ cobertura baja
 
 ─────────────────────────────────────────────────────────────────
 
@@ -1450,6 +1316,22 @@ Sin condiciones anticipatorias confiables:
 
 ─────────────────────────────────────────────────────────────────
 
+▶  T4__DD_UD_DD  —  VENTA (SHORT)
+   Gatillo: Continuación bajista (SQZ↓ + ADX↓)
+   Contexto: 1D=DD (sin dirección ni momentum) · 4H=UD (tendencia activa, momentum frenando) · 1H=DD (sin dirección ni momentum)
+   Casos: 46  |  Tasa base: 54%
+
+   Condición 1: ADX 4H menor que 19.2
+   → Tasa: 81%  (lift 1.50×, p=0.012, n=16, cobertura=35%)
+
+   Condición 2: SQZ Momentum 4H mayor que 3.0
+   → Tasa: 72%  (lift 1.33×, p=0.072, n=18, cobertura=39%)
+
+   Condición 3: Volatilidad de las 10 velas 15m previas mayor que 0.2004%
+   → Tasa: 70%  (lift 1.28×, p=0.075, n=23, cobertura=50%)
+
+─────────────────────────────────────────────────────────────────
+
 ▶  T4__UU_DD_UD  —  COMPRA (LONG)
    Gatillo: Continuación bajista (SQZ↓ + ADX↓)
    Contexto: 1D=UU (tendencia con momentum creciente) · 4H=DD (sin dirección ni momentum) · 1H=UD (tendencia activa, momentum frenando)
@@ -1479,22 +1361,6 @@ Sin condiciones anticipatorias confiables:
 
    Condición 3: SQZ 15m girando al alza (dir ≥ 1.227) — momentum recuperándose
    → Tasa: 79%  (lift 1.36×, p=0.043, n=19, cobertura=34%)
-
-─────────────────────────────────────────────────────────────────
-
-▶  T3__UU_UD_DD  —  COMPRA (LONG)
-   Gatillo: Agotamiento de impulso (ADX↑ + SQZ↓)
-   Contexto: 1D=UU (tendencia con momentum creciente) · 4H=UD (tendencia activa, momentum frenando) · 1H=DD (sin dirección ni momentum)
-   Casos: 134  |  Tasa base: 40%
-
-   Condición 1: ADX 15m ≤ 13.4 — mercado sin fuerza de tendencia
-   → Tasa: 59%  (lift 1.49×, p=0.111, n=17, cobertura=13%) ⚠ cobertura baja
-
-   Condición 2: ADX 1H mayor que 36.8
-   → Tasa: 57%  (lift 1.43×, p=0.035, n=30, cobertura=22%) ⚠ cobertura baja
-
-   Condición 3: SQZ 1H positivo (> 18.7) — contexto alcista 1H
-   → Tasa: 56%  (lift 1.42×, p=0.072, n=25, cobertura=19%) ⚠ cobertura baja
 
 ─────────────────────────────────────────────────────────────────
 
@@ -1610,6 +1476,22 @@ Sin condiciones anticipatorias confiables:
 
 ─────────────────────────────────────────────────────────────────
 
+▶  T4__DD_DD_DU  —  VENTA (SHORT)
+   Gatillo: Continuación bajista (SQZ↓ + ADX↓)
+   Contexto: 1D=DD (sin dirección ni momentum) · 4H=DD (sin dirección ni momentum) · 1H=DU (fuerza sin dirección, momentum activo)
+   Casos: 215  |  Tasa base: 53%
+
+   Condición 1: ADX 4H mayor que 28.7
+   → Tasa: 77%  (lift 1.47×, p=0.003, n=31, cobertura=14%) ⚠ cobertura baja
+
+   Condición 2: ADX 15m desacelerando (accel ≤ -0.495)
+   → Tasa: 77%  (lift 1.47×, p=0.002, n=35, cobertura=16%) ⚠ cobertura baja
+
+   Condición 3: ADX 1H mayor que 34.5
+   → Tasa: 73%  (lift 1.39×, p=0.035, n=26, cobertura=12%) ⚠ cobertura baja
+
+─────────────────────────────────────────────────────────────────
+
 ▶  T3__UD_DD_UD  —  COMPRA (LONG)
    Gatillo: Agotamiento de impulso (ADX↑ + SQZ↓)
    Contexto: 1D=UD (tendencia activa, momentum frenando) · 4H=DD (sin dirección ni momentum) · 1H=UD (tendencia activa, momentum frenando)
@@ -1703,6 +1585,16 @@ Sin condiciones anticipatorias confiables:
 
    Condición 3: Pendiente ADX 1H menor que 1.106
    → Tasa: 67%  (lift 1.22×, p=0.106, n=27, cobertura=49%)
+
+─────────────────────────────────────────────────────────────────
+
+▶  T1__DU_UU_UD  —  COMPRA (LONG)
+   Gatillo: Reversión (SQZ↑ + ADX↓)
+   Contexto: 1D=DU (fuerza sin dirección, momentum activo) · 4H=UU (tendencia con momentum creciente) · 1H=UD (tendencia activa, momentum frenando)
+   Casos: 22  |  Tasa base: 50%
+
+   Condición 1: ADX 1H acelerando (pendiente ≥ 0.285)
+   → Tasa: 73%  (lift 1.47×, p=0.004, n=15, cobertura=68%)
 
 ─────────────────────────────────────────────────────────────────
 
@@ -1914,6 +1806,22 @@ Sin condiciones anticipatorias confiables:
 
 ─────────────────────────────────────────────────────────────────
 
+▶  T2__DU_UD_DD  —  COMPRA (LONG)
+   Gatillo: Impulso confirmado (ADX↑ + SQZ↑)
+   Contexto: 1D=DU (fuerza sin dirección, momentum activo) · 4H=UD (tendencia activa, momentum frenando) · 1H=DD (sin dirección ni momentum)
+   Casos: 29  |  Tasa base: 55%
+
+   Condición 1: SQZ 15m negativo por debajo de -2.2 — momentum bajista dominante
+   → Tasa: 80%  (lift 1.45×, p=0.009, n=15, cobertura=52%)
+
+   Condición 2: Spread DI+−DI− 15m menor que 4.6
+   → Tasa: 80%  (lift 1.45×, p=0.009, n=15, cobertura=52%)
+
+   Condición 3: ADX 15m ≥ 15.3 — tendencia con fuerza suficiente
+   → Tasa: 75%  (lift 1.36×, p=0.027, n=16, cobertura=55%)
+
+─────────────────────────────────────────────────────────────────
+
 ▶  T1__UD_DU_DD  —  VENTA (SHORT)
    Gatillo: Reversión (SQZ↑ + ADX↓)
    Contexto: 1D=UD (tendencia activa, momentum frenando) · 4H=DU (fuerza sin dirección, momentum activo) · 1H=DD (sin dirección ni momentum)
@@ -2026,6 +1934,22 @@ Sin condiciones anticipatorias confiables:
 
 ─────────────────────────────────────────────────────────────────
 
+▶  T1__UU_DU_DD  —  COMPRA (LONG)
+   Gatillo: Reversión (SQZ↑ + ADX↓)
+   Contexto: 1D=UU (tendencia con momentum creciente) · 4H=DU (fuerza sin dirección, momentum activo) · 1H=DD (sin dirección ni momentum)
+   Casos: 56  |  Tasa base: 46%
+
+   Condición 1: RSI 1H ≤ 47
+   → Tasa: 67%  (lift 1.44×, p=0.048, n=18, cobertura=32%)
+
+   Condición 2: ADX 1D mayor que 34.0
+   → Tasa: 67%  (lift 1.44×, p=0.079, n=15, cobertura=27%)
+
+   Condición 3: SQZ 15m negativo por debajo de -11.4 — momentum bajista dominante
+   → Tasa: 65%  (lift 1.39×, p=0.087, n=17, cobertura=30%)
+
+─────────────────────────────────────────────────────────────────
+
 ▶  T4__DD_UU_UD  —  VENTA (SHORT)
    Gatillo: Continuación bajista (SQZ↓ + ADX↓)
    Contexto: 1D=DD (sin dirección ni momentum) · 4H=UU (tendencia con momentum creciente) · 1H=UD (tendencia activa, momentum frenando)
@@ -2090,6 +2014,22 @@ Sin condiciones anticipatorias confiables:
 
 ─────────────────────────────────────────────────────────────────
 
+▶  T4__UD_UU_UU  —  COMPRA (LONG)
+   Gatillo: Continuación bajista (SQZ↓ + ADX↓)
+   Contexto: 1D=UD (tendencia activa, momentum frenando) · 4H=UU (tendencia con momentum creciente) · 1H=UU (tendencia con momentum creciente)
+   Casos: 103  |  Tasa base: 54%
+
+   Condición 1: Volatilidad 15m baja (ATR norm ≤ 0.0030) — mercado comprimido
+   → Tasa: 78%  (lift 1.43×, p=0.037, n=18, cobertura=18%) ⚠ cobertura baja
+
+   Condición 2: Pendiente ADX 1H menor que 0.434
+   → Tasa: 71%  (lift 1.31×, p=0.091, n=21, cobertura=20%) ⚠ cobertura baja
+
+   Condición 3: Distancia a EMA55 1H menor que 1.68%
+   → Tasa: 64%  (lift 1.18×, p=0.110, n=42, cobertura=41%)
+
+─────────────────────────────────────────────────────────────────
+
 ▶  T1__DU_DU_DD  —  VENTA (SHORT)
    Gatillo: Reversión (SQZ↑ + ADX↓)
    Contexto: 1D=DU (fuerza sin dirección, momentum activo) · 4H=DU (fuerza sin dirección, momentum activo) · 1H=DD (sin dirección ni momentum)
@@ -2103,22 +2043,6 @@ Sin condiciones anticipatorias confiables:
 
    Condición 3: SQZ 1H positivo (> 14.9) — contexto alcista 1H
    → Tasa: 81%  (lift 1.41×, p=0.037, n=16, cobertura=27%)
-
-─────────────────────────────────────────────────────────────────
-
-▶  T3__DD_UD_DU  —  VENTA (SHORT)
-   Gatillo: Agotamiento de impulso (ADX↑ + SQZ↓)
-   Contexto: 1D=DD (sin dirección ni momentum) · 4H=UD (tendencia activa, momentum frenando) · 1H=DU (fuerza sin dirección, momentum activo)
-   Casos: 178  |  Tasa base: 51%
-
-   Condición 1: SQZ 15m girando a la baja (dir ≤ -2.038) — momentum cediendo
-   → Tasa: 72%  (lift 1.43×, p=0.080, n=18, cobertura=10%) ⚠ cobertura baja
-
-   Condición 2: SQZ Momentum 4H menor que -148.6
-   → Tasa: 72%  (lift 1.43×, p=0.080, n=18, cobertura=10%) ⚠ cobertura baja
-
-   Condición 3: ADX 1H mayor que 46.6
-   → Tasa: 69%  (lift 1.36×, p=0.042, n=29, cobertura=16%) ⚠ cobertura baja
 
 ─────────────────────────────────────────────────────────────────
 
@@ -2151,22 +2075,6 @@ Sin condiciones anticipatorias confiables:
 
    Condición 3: SQZ 1H mayor que -1.7
    → Tasa: 69%  (lift 1.22×, p=0.097, n=35, cobertura=33%)
-
-─────────────────────────────────────────────────────────────────
-
-▶  T1__UU_DU_DD  —  VENTA (SHORT)
-   Gatillo: Reversión (SQZ↑ + ADX↓)
-   Contexto: 1D=UU (tendencia con momentum creciente) · 4H=DU (fuerza sin dirección, momentum activo) · 1H=DD (sin dirección ni momentum)
-   Casos: 56  |  Tasa base: 54%
-
-   Condición 1: Pendiente de las 10 velas 15m previas mayor que -0.0049
-   → Tasa: 76%  (lift 1.43×, p=0.040, n=17, cobertura=30%)
-
-   Condición 2: ADX 15m desacelerando (accel ≤ -0.673)
-   → Tasa: 75%  (lift 1.40×, p=0.074, n=16, cobertura=29%)
-
-   Condición 3: Precio al menos 0.10% por encima de EMA55 15m — extensión alcista
-   → Tasa: 72%  (lift 1.35×, p=0.085, n=18, cobertura=32%)
 
 ─────────────────────────────────────────────────────────────────
 
@@ -2218,6 +2126,19 @@ Sin condiciones anticipatorias confiables:
 
 ─────────────────────────────────────────────────────────────────
 
+▶  T2__DD_DU_UD  —  VENTA (SHORT)
+   Gatillo: Impulso confirmado (ADX↑ + SQZ↑)
+   Contexto: 1D=DD (sin dirección ni momentum) · 4H=DU (fuerza sin dirección, momentum activo) · 1H=UD (tendencia activa, momentum frenando)
+   Casos: 25  |  Tasa base: 44%
+
+   Condición 1: ADX 1D mayor que 19.6
+   → Tasa: 62%  (lift 1.42×, p=0.033, n=16, cobertura=64%)
+
+   Condición 2: SQZ 15m girando a la baja (dir ≤ 1.565) — momentum cediendo
+   → Tasa: 60%  (lift 1.36×, p=0.099, n=15, cobertura=60%)
+
+─────────────────────────────────────────────────────────────────
+
 ▶  T4__UD_DU_UD  —  VENTA (SHORT)
    Gatillo: Continuación bajista (SQZ↓ + ADX↓)
    Contexto: 1D=UD (tendencia activa, momentum frenando) · 4H=DU (fuerza sin dirección, momentum activo) · 1H=UD (tendencia activa, momentum frenando)
@@ -2266,6 +2187,22 @@ Sin condiciones anticipatorias confiables:
 
 ─────────────────────────────────────────────────────────────────
 
+▶  T3__UU_UD_DD  —  VENTA (SHORT)
+   Gatillo: Agotamiento de impulso (ADX↑ + SQZ↓)
+   Contexto: 1D=UU (tendencia con momentum creciente) · 4H=UD (tendencia activa, momentum frenando) · 1H=DD (sin dirección ni momentum)
+   Casos: 134  |  Tasa base: 60%
+
+   Condición 1: ADX 15m ≥ 30.8 — tendencia con fuerza suficiente
+   → Tasa: 84%  (lift 1.41×, p=0.022, n=19, cobertura=14%) ⚠ cobertura baja
+
+   Condición 2: RSI 15m ≤ 33 — sobreventa relativa
+   → Tasa: 79%  (lift 1.32×, p=0.079, n=19, cobertura=14%) ⚠ cobertura baja
+
+   Condición 3: Distancia a EMA55 4H menor que 3.70%
+   → Tasa: 74%  (lift 1.24×, p=0.065, n=31, cobertura=23%) ⚠ cobertura baja
+
+─────────────────────────────────────────────────────────────────
+
 ▶  T3__UU_DU_DU  —  COMPRA (LONG)
    Gatillo: Agotamiento de impulso (ADX↑ + SQZ↓)
    Contexto: 1D=UU (tendencia con momentum creciente) · 4H=DU (fuerza sin dirección, momentum activo) · 1H=DU (fuerza sin dirección, momentum activo)
@@ -2311,22 +2248,6 @@ Sin condiciones anticipatorias confiables:
 
    Condición 3: ADX 15m ≥ 36.5 — tendencia con fuerza suficiente
    → Tasa: 78%  (lift 1.33×, p=0.106, n=18, cobertura=20%) ⚠ cobertura baja
-
-─────────────────────────────────────────────────────────────────
-
-▶  T3__DD_DU_UD  —  VENTA (SHORT)
-   Gatillo: Agotamiento de impulso (ADX↑ + SQZ↓)
-   Contexto: 1D=DD (sin dirección ni momentum) · 4H=DU (fuerza sin dirección, momentum activo) · 1H=UD (tendencia activa, momentum frenando)
-   Casos: 123  |  Tasa base: 51%
-
-   Condición 1: SQZ 15m girando al alza (dir ≥ -0.095) — momentum recuperándose
-   → Tasa: 72%  (lift 1.41×, p=0.074, n=18, cobertura=15%) ⚠ cobertura baja
-
-   Condición 2: ADX 4H menor que 16.0
-   → Tasa: 72%  (lift 1.41×, p=0.074, n=18, cobertura=15%) ⚠ cobertura baja
-
-   Condición 3: ADX 1D menor que 21.2
-   → Tasa: 67%  (lift 1.30×, p=0.061, n=30, cobertura=24%) ⚠ cobertura baja
 
 ─────────────────────────────────────────────────────────────────
 
@@ -2423,6 +2344,22 @@ Sin condiciones anticipatorias confiables:
 
    Condición 3: ADX 15m acelerando en 2ª derivada (≥ 0.093) — momentum en expansión
    → Tasa: 62%  (lift 1.25×, p=0.112, n=37, cobertura=14%) ⚠ cobertura baja
+
+─────────────────────────────────────────────────────────────────
+
+▶  T4__DD_DU_DD  —  VENTA (SHORT)
+   Gatillo: Continuación bajista (SQZ↓ + ADX↓)
+   Contexto: 1D=DD (sin dirección ni momentum) · 4H=DU (fuerza sin dirección, momentum activo) · 1H=DD (sin dirección ni momentum)
+   Casos: 197  |  Tasa base: 54%
+
+   Condición 1: ADX 1H mayor que 26.3
+   → Tasa: 75%  (lift 1.39×, p=0.002, n=44, cobertura=22%) ⚠ cobertura baja
+
+   Condición 2: ADX 1H frenando (pendiente ≤ -1.503)
+   → Tasa: 75%  (lift 1.39×, p=0.058, n=20, cobertura=10%) ⚠ cobertura baja
+
+   Condición 3: ADX 4H mayor que 35.6
+   → Tasa: 75%  (lift 1.39×, p=0.023, n=28, cobertura=14%) ⚠ cobertura baja
 
 ─────────────────────────────────────────────────────────────────
 
@@ -2554,6 +2491,38 @@ Sin condiciones anticipatorias confiables:
 
 ─────────────────────────────────────────────────────────────────
 
+▶  T2__DU_UU_UU  —  COMPRA (LONG)
+   Gatillo: Impulso confirmado (ADX↑ + SQZ↑)
+   Contexto: 1D=DU (fuerza sin dirección, momentum activo) · 4H=UU (tendencia con momentum creciente) · 1H=UU (tendencia con momentum creciente)
+   Casos: 46  |  Tasa base: 54%
+
+   Condición 1: ADX 1D menor que 22.8
+   → Tasa: 75%  (lift 1.38×, p=0.062, n=16, cobertura=35%)
+
+   Condición 2: Precio al menos 0.76% por encima de EMA20 15m
+   → Tasa: 73%  (lift 1.35×, p=0.115, n=15, cobertura=33%)
+
+   Condición 3: ADX 15m acelerando en 2ª derivada (≥ 0.786) — momentum en expansión
+   → Tasa: 72%  (lift 1.33×, p=0.072, n=18, cobertura=39%)
+
+─────────────────────────────────────────────────────────────────
+
+▶  T1__UD_UD_DU  —  VENTA (SHORT)
+   Gatillo: Reversión (SQZ↑ + ADX↓)
+   Contexto: 1D=UD (tendencia activa, momentum frenando) · 4H=UD (tendencia activa, momentum frenando) · 1H=DU (fuerza sin dirección, momentum activo)
+   Casos: 23  |  Tasa base: 44%
+
+   Condición 1: ADX 1H frenando (pendiente ≤ -0.392)
+   → Tasa: 60%  (lift 1.38×, p=0.074, n=15, cobertura=65%)
+
+   Condición 2: RSI 15m ≥ 49 — sobrecompra relativa
+   → Tasa: 56%  (lift 1.29×, p=0.089, n=16, cobertura=70%)
+
+   Condición 3: Distancia a EMA55 1H mayor que -4.76%
+   → Tasa: 56%  (lift 1.29×, p=0.089, n=16, cobertura=70%)
+
+─────────────────────────────────────────────────────────────────
+
 ▶  T3__DU_DD_UD  —  COMPRA (LONG)
    Gatillo: Agotamiento de impulso (ADX↑ + SQZ↓)
    Contexto: 1D=DU (fuerza sin dirección, momentum activo) · 4H=DD (sin dirección ni momentum) · 1H=UD (tendencia activa, momentum frenando)
@@ -2583,22 +2552,6 @@ Sin condiciones anticipatorias confiables:
 
    Condición 3: ADX 1D menor que 21.2
    → Tasa: 67%  (lift 1.27×, p=0.028, n=49, cobertura=18%) ⚠ cobertura baja
-
-─────────────────────────────────────────────────────────────────
-
-▶  T2__UU_DD_DU  —  VENTA (SHORT)
-   Gatillo: Impulso confirmado (ADX↑ + SQZ↑)
-   Contexto: 1D=UU (tendencia con momentum creciente) · 4H=DD (sin dirección ni momentum) · 1H=DU (fuerza sin dirección, momentum activo)
-   Casos: 98  |  Tasa base: 51%
-
-   Condición 1: Volatilidad de las 10 velas 15m previas menor que 0.1547%
-   → Tasa: 70%  (lift 1.37×, p=0.079, n=20, cobertura=20%) ⚠ cobertura baja
-
-   Condición 2: Precio al menos 11.73% por encima de EMA55 1D
-   → Tasa: 67%  (lift 1.31×, p=0.000, n=57, cobertura=61%)
-
-   Condición 3: RSI 15m ≤ 62 — sobreventa relativa
-   → Tasa: 61%  (lift 1.20×, p=0.042, n=54, cobertura=55%)
 
 ─────────────────────────────────────────────────────────────────
 
@@ -2650,6 +2603,22 @@ Sin condiciones anticipatorias confiables:
 
 ─────────────────────────────────────────────────────────────────
 
+▶  T4__DD_DD_DD  —  VENTA (SHORT)
+   Gatillo: Continuación bajista (SQZ↓ + ADX↓)
+   Contexto: 1D=DD (sin dirección ni momentum) · 4H=DD (sin dirección ni momentum) · 1H=DD (sin dirección ni momentum)
+   Casos: 77  |  Tasa base: 56%
+
+   Condición 1: Las 10 velas 15m previas cayeron ≥ 0.60% — sesgo bajista
+   → Tasa: 76%  (lift 1.37×, p=0.059, n=17, cobertura=22%) ⚠ cobertura baja
+
+   Condición 2: SQZ 15m girando a la baja (dir ≤ -1.583) — momentum cediendo
+   → Tasa: 76%  (lift 1.36×, p=0.016, n=25, cobertura=32%)
+
+   Condición 3: ADX 4H mayor que 24.2
+   → Tasa: 74%  (lift 1.32×, p=0.110, n=19, cobertura=25%) ⚠ cobertura baja
+
+─────────────────────────────────────────────────────────────────
+
 ▶  T2__DD_UU_DU  —  VENTA (SHORT)
    Gatillo: Impulso confirmado (ADX↑ + SQZ↑)
    Contexto: 1D=DD (sin dirección ni momentum) · 4H=UU (tendencia con momentum creciente) · 1H=DU (fuerza sin dirección, momentum activo)
@@ -2698,6 +2667,22 @@ Sin condiciones anticipatorias confiables:
 
 ─────────────────────────────────────────────────────────────────
 
+▶  T1__DU_DD_DD  —  VENTA (SHORT)
+   Gatillo: Reversión (SQZ↑ + ADX↓)
+   Contexto: 1D=DU (fuerza sin dirección, momentum activo) · 4H=DD (sin dirección ni momentum) · 1H=DD (sin dirección ni momentum)
+   Casos: 59  |  Tasa base: 61%
+
+   Condición 1: SQZ 15m girando al alza (dir ≥ 0.748) — momentum recuperándose
+   → Tasa: 83%  (lift 1.37×, p=0.023, n=18, cobertura=30%)
+
+   Condición 2: Spread DI+−DI− 15m mayor que -1.4
+   → Tasa: 81%  (lift 1.33×, p=0.073, n=16, cobertura=27%)
+
+   Condición 3: ADX 1H frenando (pendiente ≤ -0.721)
+   → Tasa: 81%  (lift 1.33×, p=0.026, n=21, cobertura=36%)
+
+─────────────────────────────────────────────────────────────────
+
 ▶  T2__DU_UU_DU  —  COMPRA (LONG)
    Gatillo: Impulso confirmado (ADX↑ + SQZ↑)
    Contexto: 1D=DU (fuerza sin dirección, momentum activo) · 4H=UU (tendencia con momentum creciente) · 1H=DU (fuerza sin dirección, momentum activo)
@@ -2714,6 +2699,22 @@ Sin condiciones anticipatorias confiables:
 
 ─────────────────────────────────────────────────────────────────
 
+▶  T4__UU_DU_DU  —  COMPRA (LONG)
+   Gatillo: Continuación bajista (SQZ↓ + ADX↓)
+   Contexto: 1D=UU (tendencia con momentum creciente) · 4H=DU (fuerza sin dirección, momentum activo) · 1H=DU (fuerza sin dirección, momentum activo)
+   Casos: 118  |  Tasa base: 55%
+
+   Condición 1: Precio al menos 16.40% por debajo de EMA55 1D
+   → Tasa: 74%  (lift 1.36×, p=0.080, n=19, cobertura=16%) ⚠ cobertura baja
+
+   Condición 2: Volatilidad 15m baja (ATR norm ≤ 0.0040) — mercado comprimido
+   → Tasa: 67%  (lift 1.22×, p=0.054, n=43, cobertura=36%)
+
+   Condición 3: SQZ 15m girando al alza (dir ≥ -0.493) — momentum recuperándose
+   → Tasa: 67%  (lift 1.21×, p=0.081, n=39, cobertura=33%)
+
+─────────────────────────────────────────────────────────────────
+
 ▶  T3__UD_UU_DD  —  VENTA (SHORT)
    Gatillo: Agotamiento de impulso (ADX↑ + SQZ↓)
    Contexto: 1D=UD (tendencia activa, momentum frenando) · 4H=UU (tendencia con momentum creciente) · 1H=DD (sin dirección ni momentum)
@@ -2727,38 +2728,6 @@ Sin condiciones anticipatorias confiables:
 
    Condición 3: ADX 15m ≤ 14.5 — mercado sin fuerza de tendencia
    → Tasa: 81%  (lift 1.31×, p=0.077, n=16, cobertura=28%)
-
-─────────────────────────────────────────────────────────────────
-
-▶  T4__DD_DU_DD  —  COMPRA (LONG)
-   Gatillo: Continuación bajista (SQZ↓ + ADX↓)
-   Contexto: 1D=DD (sin dirección ni momentum) · 4H=DU (fuerza sin dirección, momentum activo) · 1H=DD (sin dirección ni momentum)
-   Casos: 197  |  Tasa base: 46%
-
-   Condición 1: Precio al menos 0.31% por debajo de EMA55 15m — extensión bajista
-   → Tasa: 62%  (lift 1.35×, p=0.022, n=40, cobertura=20%) ⚠ cobertura baja
-
-   Condición 2: ADX 15m desacelerando (accel ≤ -0.452)
-   → Tasa: 60%  (lift 1.31×, p=0.030, n=48, cobertura=24%) ⚠ cobertura baja
-
-   Condición 3: Pendiente ADX 15m mayor que -0.150
-   → Tasa: 58%  (lift 1.25×, p=0.074, n=52, cobertura=26%)
-
-─────────────────────────────────────────────────────────────────
-
-▶  T3__DD_UU_UD  —  VENTA (SHORT)
-   Gatillo: Agotamiento de impulso (ADX↑ + SQZ↓)
-   Contexto: 1D=DD (sin dirección ni momentum) · 4H=UU (tendencia con momentum creciente) · 1H=UD (tendencia activa, momentum frenando)
-   Casos: 106  |  Tasa base: 57%
-
-   Condición 1: ADX 15m ≤ 19.5 — mercado sin fuerza de tendencia
-   → Tasa: 76%  (lift 1.35×, p=0.108, n=17, cobertura=16%) ⚠ cobertura baja
-
-   Condición 2: RSI 15m ≥ 43 — sobrecompra relativa
-   → Tasa: 73%  (lift 1.30×, p=0.032, n=30, cobertura=28%)
-
-   Condición 3: ADX 4H mayor que 34.4
-   → Tasa: 71%  (lift 1.25×, p=0.027, n=38, cobertura=36%)
 
 ─────────────────────────────────────────────────────────────────
 
@@ -2826,6 +2795,22 @@ Sin condiciones anticipatorias confiables:
 
 ─────────────────────────────────────────────────────────────────
 
+▶  T3__DD_UU_UD  —  COMPRA (LONG)
+   Gatillo: Agotamiento de impulso (ADX↑ + SQZ↓)
+   Contexto: 1D=DD (sin dirección ni momentum) · 4H=UU (tendencia con momentum creciente) · 1H=UD (tendencia activa, momentum frenando)
+   Casos: 106  |  Tasa base: 43%
+
+   Condición 1: SQZ Momentum 4H mayor que 4.1
+   → Tasa: 58%  (lift 1.34×, p=0.106, n=24, cobertura=23%) ⚠ cobertura baja
+
+   Condición 2: Precio al menos 14.52% por encima de EMA55 1D
+   → Tasa: 58%  (lift 1.34×, p=0.106, n=24, cobertura=23%) ⚠ cobertura baja
+
+   Condición 3: RSI 1H ≤ 40
+   → Tasa: 56%  (lift 1.30×, p=0.045, n=39, cobertura=37%)
+
+─────────────────────────────────────────────────────────────────
+
 ▶  T4__DD_DU_UD  —  VENTA (SHORT)
    Gatillo: Continuación bajista (SQZ↓ + ADX↓)
    Contexto: 1D=DD (sin dirección ni momentum) · 4H=DU (fuerza sin dirección, momentum activo) · 1H=UD (tendencia activa, momentum frenando)
@@ -2874,6 +2859,22 @@ Sin condiciones anticipatorias confiables:
 
 ─────────────────────────────────────────────────────────────────
 
+▶  T3__DD_UU_DU  —  COMPRA (LONG)
+   Gatillo: Agotamiento de impulso (ADX↑ + SQZ↓)
+   Contexto: 1D=DD (sin dirección ni momentum) · 4H=UU (tendencia con momentum creciente) · 1H=DU (fuerza sin dirección, momentum activo)
+   Casos: 133  |  Tasa base: 51%
+
+   Condición 1: ADX 1D mayor que 38.8
+   → Tasa: 68%  (lift 1.33×, p=0.103, n=22, cobertura=16%) ⚠ cobertura baja
+
+   Condición 2: Pendiente ADX 1H mayor que -0.477
+   → Tasa: 67%  (lift 1.30×, p=0.086, n=27, cobertura=20%) ⚠ cobertura baja
+
+   Condición 3: SQZ 1H positivo (> 11.4) — contexto alcista 1H
+   → Tasa: 67%  (lift 1.30×, p=0.063, n=30, cobertura=23%) ⚠ cobertura baja
+
+─────────────────────────────────────────────────────────────────
+
 ▶  T2__UU_DU_UU  —  VENTA (SHORT)
    Gatillo: Impulso confirmado (ADX↑ + SQZ↑)
    Contexto: 1D=UU (tendencia con momentum creciente) · 4H=DU (fuerza sin dirección, momentum activo) · 1H=UU (tendencia con momentum creciente)
@@ -2919,29 +2920,6 @@ Sin condiciones anticipatorias confiables:
 
 ─────────────────────────────────────────────────────────────────
 
-▶  T1__DU_UU_UD  —  VENTA (SHORT)
-   Gatillo: Reversión (SQZ↑ + ADX↓)
-   Contexto: 1D=DU (fuerza sin dirección, momentum activo) · 4H=UU (tendencia con momentum creciente) · 1H=UD (tendencia activa, momentum frenando)
-   Casos: 22  |  Tasa base: 50%
-
-   Condición 1: Pendiente ADX 1H menor que 0.809
-   → Tasa: 67%  (lift 1.33×, p=0.064, n=15, cobertura=68%)
-
-─────────────────────────────────────────────────────────────────
-
-▶  T2__UU_UD_DD  —  COMPRA (LONG)
-   Gatillo: Impulso confirmado (ADX↑ + SQZ↑)
-   Contexto: 1D=UU (tendencia con momentum creciente) · 4H=UD (tendencia activa, momentum frenando) · 1H=DD (sin dirección ni momentum)
-   Casos: 20  |  Tasa base: 50%
-
-   Condición 1: ADX 15m acelerando en 2ª derivada (≥ 0.321) — momentum en expansión
-   → Tasa: 67%  (lift 1.33×, p=0.033, n=15, cobertura=75%)
-
-   Condición 2: Precio al menos 2.76% por encima de EMA55 1D
-   → Tasa: 67%  (lift 1.33×, p=0.033, n=15, cobertura=75%)
-
-─────────────────────────────────────────────────────────────────
-
 ▶  T2__UU_UU_DD  —  VENTA (SHORT)
    Gatillo: Impulso confirmado (ADX↑ + SQZ↑)
    Contexto: 1D=UU (tendencia con momentum creciente) · 4H=UU (tendencia con momentum creciente) · 1H=DD (sin dirección ni momentum)
@@ -2974,19 +2952,6 @@ Sin condiciones anticipatorias confiables:
 
 ─────────────────────────────────────────────────────────────────
 
-▶  T1__UD_UD_DU  —  COMPRA (LONG)
-   Gatillo: Reversión (SQZ↑ + ADX↓)
-   Contexto: 1D=UD (tendencia activa, momentum frenando) · 4H=UD (tendencia activa, momentum frenando) · 1H=DU (fuerza sin dirección, momentum activo)
-   Casos: 23  |  Tasa base: 56%
-
-   Condición 1: RSI 1H ≤ 42
-   → Tasa: 75%  (lift 1.33×, p=0.019, n=16, cobertura=70%)
-
-   Condición 2: ADX 15m desacelerando (accel ≤ -0.618)
-   → Tasa: 71%  (lift 1.25×, p=0.051, n=17, cobertura=74%)
-
-─────────────────────────────────────────────────────────────────
-
 ▶  T2__UU_UD_DU  —  VENTA (SHORT)
    Gatillo: Impulso confirmado (ADX↑ + SQZ↑)
    Contexto: 1D=UU (tendencia con momentum creciente) · 4H=UD (tendencia activa, momentum frenando) · 1H=DU (fuerza sin dirección, momentum activo)
@@ -2997,6 +2962,22 @@ Sin condiciones anticipatorias confiables:
 
    Condición 2: Precio al menos 0.40% por encima de EMA55 15m — extensión alcista
    → Tasa: 69%  (lift 1.33×, p=0.054, n=16, cobertura=59%)
+
+─────────────────────────────────────────────────────────────────
+
+▶  T1__UD_DD_DD  —  COMPRA (LONG)
+   Gatillo: Reversión (SQZ↑ + ADX↓)
+   Contexto: 1D=UD (tendencia activa, momentum frenando) · 4H=DD (sin dirección ni momentum) · 1H=DD (sin dirección ni momentum)
+   Casos: 23  |  Tasa base: 52%
+
+   Condición 1: Precio al menos 0.04% por debajo de EMA55 15m — extensión bajista
+   → Tasa: 69%  (lift 1.32×, p=0.027, n=16, cobertura=70%)
+
+   Condición 2: Distancia a EMA20 15m menor que 0.06%
+   → Tasa: 69%  (lift 1.32×, p=0.027, n=16, cobertura=70%)
+
+   Condición 3: Pendiente ADX 15m mayor que -0.785
+   → Tasa: 67%  (lift 1.28×, p=0.089, n=15, cobertura=65%)
 
 ─────────────────────────────────────────────────────────────────
 
@@ -3068,6 +3049,22 @@ Sin condiciones anticipatorias confiables:
 
    Condición 3: Pendiente ADX 15m mayor que -1.231
    → Tasa: 66%  (lift 1.14×, p=0.053, n=32, cobertura=80%)
+
+─────────────────────────────────────────────────────────────────
+
+▶  T1__DU_DD_DU  —  VENTA (SHORT)
+   Gatillo: Reversión (SQZ↑ + ADX↓)
+   Contexto: 1D=DU (fuerza sin dirección, momentum activo) · 4H=DD (sin dirección ni momentum) · 1H=DU (fuerza sin dirección, momentum activo)
+   Casos: 38  |  Tasa base: 63%
+
+   Condición 1: SQZ 1H mayor que -6.3
+   → Tasa: 82%  (lift 1.30×, p=0.043, n=17, cobertura=45%)
+
+   Condición 2: ADX 1H frenando (pendiente ≤ -0.641)
+   → Tasa: 81%  (lift 1.29×, p=0.088, n=16, cobertura=42%)
+
+   Condición 3: RSI 15m ≥ 53 — sobrecompra relativa
+   → Tasa: 80%  (lift 1.27×, p=0.042, n=20, cobertura=53%)
 
 ─────────────────────────────────────────────────────────────────
 
@@ -3284,16 +3281,6 @@ Sin condiciones anticipatorias confiables:
 
    Condición 2: ADX 1H mayor que 15.7
    → Tasa: 80%  (lift 1.23×, p=0.031, n=15, cobertura=75%)
-
-─────────────────────────────────────────────────────────────────
-
-▶  T2__DD_DU_UD  —  COMPRA (LONG)
-   Gatillo: Impulso confirmado (ADX↑ + SQZ↑)
-   Contexto: 1D=DD (sin dirección ni momentum) · 4H=DU (fuerza sin dirección, momentum activo) · 1H=UD (tendencia activa, momentum frenando)
-   Casos: 25  |  Tasa base: 56%
-
-   Condición 1: Distancia a EMA20 15m menor que 0.60%
-   → Tasa: 69%  (lift 1.23×, p=0.115, n=16, cobertura=64%)
 
 ─────────────────────────────────────────────────────────────────
 
