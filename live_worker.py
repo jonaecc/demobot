@@ -1372,9 +1372,7 @@ class MLLiveBotWorker:
                             )
             else:
                 if self.posicion_actual:
-                    self.log.success("📉 Posición cerrada externamente. Limpiando.")
-                    self.posicion_actual = None
-                    self.save_internal_state()
+                    self._handle_position_closed(source="audit")
 
         except Exception as e:
             if not self._handle_rate_limit_error(e):
@@ -1773,6 +1771,73 @@ class MLLiveBotWorker:
             return False
 
     # ──────────────────────────────────────────────────────────────
+    # MANEJO CENTRALIZADO DE CIERRE DE POSICIÓN
+    # ──────────────────────────────────────────────────────────────
+
+    def _handle_position_closed(self, source="monitor"):
+        """
+        Punto único de manejo de cierre de posición.
+        Calcula PnL, exporta trade, notifica Instagram, ejecuta circuit breaker
+        y limpia el estado. Llamado desde monitor_position y audit_persistence.
+        """
+        if not self.posicion_actual:
+            return
+
+        pos   = self.posicion_actual
+        side  = pos["side"]
+        entry = float(pos["entry_price"])
+
+        try:
+            self._cancel_all_orders(self.get_clean_symbol())
+        except Exception:
+            pass
+
+        # Forzar sync inmediato del balance real
+        self.sync_balance(force=True)
+
+        # Obtener precio de salida: markPrice del exchange
+        precio_salida = entry  # fallback seguro
+        try:
+            symbol_clean = self.get_clean_symbol()
+            pos_info = self.client.futures_position_information(symbol=symbol_clean)
+            mark = float(next((p["markPrice"] for p in pos_info), 0))
+            if mark > 0:
+                precio_salida = mark
+        except Exception:
+            pass
+
+        pnl_bruto = (
+            (precio_salida - entry) * pos["qty"] if side == "buy"
+            else (entry - precio_salida) * pos["qty"]
+        )
+        costos   = entry * pos["qty"] * 0.0009   # aprox 2 lados
+        pnl_neto = pnl_bruto - costos
+
+        self.daily_pnl += pnl_neto
+
+        if pnl_neto > 0:
+            self.loss_streak = 0
+        else:
+            self.loss_streak += 1
+
+        self.log.success(
+            f"📉 Posición cerrada ({source}) | PnL: ${pnl_neto:.4f} | racha SL: {self.loss_streak}"
+        )
+        self.log_trade_export(
+            "EXIT", side, pos["qty"], entry, precio_salida, pnl_neto,
+            scenario=pos.get("scenario")
+        )
+        notificar_cierre(
+            side=side, symbol=self.symbol, entry_price=entry,
+            exit_price=precio_salida, pnl_usd=pnl_neto,
+            scenario=pos.get("scenario"), log=self.log
+        )
+        self._manage_circuit_breaker()
+        self.posicion_actual = None
+        self.entry_lock      = False
+        self.save_internal_state()
+
+    # ──────────────────────────────────────────────────────────────
     # MONITOR DE POSICIÓN ABIERTA
     # ──────────────────────────────────────────────────────────────
 
@@ -1810,42 +1875,7 @@ class MLLiveBotWorker:
             active_pos   = next((p for p in pos_info if float(p["positionAmt"]) != 0), None)
 
             if not active_pos:
-                # Posición cerrada (SL, TP, timeout o cierre manual)
-                try:
-                    self._cancel_all_orders(symbol_clean)
-                except Exception:
-                    pass
-
-                # Forzar sync inmediato del balance real
-                self.sync_balance(force=True)
-
-                precio_salida = float(r15["current"]["close"])
-                pnl_bruto     = (
-                    (precio_salida - entry) * pos["qty"] if side == "buy"
-                    else (entry - precio_salida) * pos["qty"]
-                )
-                costos   = entry * pos["qty"] * 0.0009   # aprox 2 lados
-                pnl_neto = pnl_bruto - costos
-
-                self.daily_pnl += pnl_neto
-
-                if pnl_neto > 0:
-                    self.loss_streak = 0
-                else:
-                    self.loss_streak += 1
-
-                self.log.success(f"📉 Posición cerrada | PnL: ${pnl_neto:.4f} | racha SL: {self.loss_streak}")
-                self.log_trade_export(
-                    "EXIT", side, pos["qty"], entry, precio_salida, pnl_neto,
-                    scenario=pos.get("scenario")
-                )
-                notificar_cierre(side=side, symbol=self.symbol, entry_price=entry,
-                                  exit_price=precio_salida, pnl_usd=pnl_neto,
-                                  scenario=pos.get("scenario"), log=self.log)
-                self._manage_circuit_breaker()
-                self.posicion_actual = None
-                self.entry_lock      = False
-                self.save_internal_state()
+                self._handle_position_closed(source="monitor")
                 return
 
             # 2. Cierre por timeout si sigue abierta
