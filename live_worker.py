@@ -1795,23 +1795,37 @@ class MLLiveBotWorker:
         # Forzar sync inmediato del balance real
         self.sync_balance(force=True)
 
-        # Obtener precio de salida: markPrice del exchange
-        precio_salida = entry  # fallback seguro
-        try:
-            symbol_clean = self.get_clean_symbol()
-            pos_info = self.client.futures_position_information(symbol=symbol_clean)
-            mark = float(next((p["markPrice"] for p in pos_info), 0))
-            if mark > 0:
-                precio_salida = mark
-        except Exception:
-            pass
+        entry_balance = float(pos.get("entry_balance", 0.0))
+        qty = float(pos["qty"])
+        costos = entry * qty * 0.0009   # aprox 2 lados
 
-        pnl_bruto = (
-            (precio_salida - entry) * pos["qty"] if side == "buy"
-            else (entry - precio_salida) * pos["qty"]
-        )
-        costos   = entry * pos["qty"] * 0.0009   # aprox 2 lados
-        pnl_neto = pnl_bruto - costos
+        # Calcular PnL usando el balance real si tenemos entry_balance válido
+        if entry_balance > 0:
+            pnl_neto = self.cache_balance - entry_balance
+            pnl_bruto = pnl_neto + costos
+
+            # Deducir el precio de salida basado en el PnL real
+            if side == "buy":
+                precio_salida = entry + (pnl_bruto / qty)
+            else:
+                precio_salida = entry - (pnl_bruto / qty)
+        else:
+            # Fallback (no debería ocurrir, pero por seguridad)
+            precio_salida = entry
+            try:
+                symbol_clean = self.get_clean_symbol()
+                pos_info = self.client.futures_position_information(symbol=symbol_clean)
+                mark = float(next((p["markPrice"] for p in pos_info), 0))
+                if mark > 0:
+                    precio_salida = mark
+            except Exception:
+                pass
+
+            pnl_bruto = (
+                (precio_salida - entry) * qty if side == "buy"
+                else (entry - precio_salida) * qty
+            )
+            pnl_neto = pnl_bruto - costos
 
         self.daily_pnl += pnl_neto
 
