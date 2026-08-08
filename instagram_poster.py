@@ -322,18 +322,27 @@ def generar_imagen_cierre(symbol, side, entry_price, exit_price,
 # ══════════════════════════════════════════════════════════════════
 
 def _subir_a_imgbb(image_bytes: bytes, api_key: str) -> str:
+    """
+    Cuarto intento: Imgur.
+    Imgur es altamente confiable y sus dominios (i.imgur.com) son permitidos
+    sin restricciones por Meta/Facebook/Instagram.
+    """
     b64 = base64.b64encode(image_bytes).decode()
+    
     resp = requests.post(
-        "https://api.imgbb.com/1/upload",
-        data={"key": api_key, "image": b64, "expiration": 3600},  # 1h alcanza de sobra
-        timeout=20,
+        "https://api.imgur.com/3/image",
+        headers={"Authorization": "Client-ID 546c25a59c58ad7"},
+        data={"image": b64, "type": "base64"},
+        timeout=30,
     )
     if not resp.ok:
-        raise RuntimeError(f"imgbb rechazó la subida ({resp.status_code}): {resp.text}")
+        raise RuntimeError(f"Imgur rechazó la subida ({resp.status_code}): {resp.text}")
+    
     data = resp.json()
     if not data.get("success"):
-        raise RuntimeError(f"imgbb respondió sin éxito: {data}")
-    return data["data"]["url"]
+        raise RuntimeError(f"Imgur devolvió error: {data}")
+        
+    return data["data"]["link"]
 
 
 # ══════════════════════════════════════════════════════════════════
