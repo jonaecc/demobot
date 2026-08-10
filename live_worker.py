@@ -1945,9 +1945,6 @@ class MLLiveBotWorker:
 
         while self.is_running:
             try:
-                self.audit_persistence()
-                self.sync_balance()      # sincroniza balance real cada 60s
-
                 # ── Circuit breaker / cooldown ─────────────────────
                 if self.is_paused and self.lock_time:
                     ahora = datetime.now(timezone.utc)
@@ -1964,6 +1961,9 @@ class MLLiveBotWorker:
                 elif self.is_paused:
                     time.sleep(30)
                     continue
+
+                self.audit_persistence()
+                self.sync_balance()      # sincroniza balance real cada 60s
 
                 # ── Sincronizar parámetros desde UI ───────────────
                 if self.ui_ref:
