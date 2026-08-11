@@ -450,7 +450,6 @@ def _config_lista():
         os.environ.get("INSTAGRAM_ENABLED", "false").lower() == "true"
         and _env_limpio("IG_ACCESS_TOKEN")
         and _env_limpio("IG_USER_ID")
-        and _env_limpio("IMGBB_API_KEY")
     )
 
 
