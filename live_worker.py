@@ -331,7 +331,13 @@ def _extraer_features_pretrigger(ind_15m: dict, ind_1h: dict,
 # ══════════════════════════════════════════════════════════════════
 
 def _check_pretrigger(features: dict, esc_data: dict) -> tuple[bool, str]:
+    """Replica exacta de ``backtest_oos_v4.check_pretrigger``.
 
+    El backtest opera únicamente con el primer hallazgo (el de mayor lift
+    después de la deduplicación). No se deben aprobar señales por cumplir un
+    segundo o tercer hallazgo: eso convierte el filtro en un OR y amplía el
+    universo de trades respecto de la simulación.
+    """
     hallazgos = esc_data.get("hallazgos", []) or []
     if not hallazgos:
         base_rate = esc_data.get("base_rate", 0.0)
@@ -339,24 +345,19 @@ def _check_pretrigger(features: dict, esc_data: dict) -> tuple[bool, str]:
             return False, "sin_hallazgos_y_tasa_baja"
         return True, "sin_condicion"
 
-    for i, h in enumerate(hallazgos):
-        feat   = h.get("feature", "")
-        op     = h.get("operador", ">=")
-        umbral = h.get("umbral", 0)
-        val    = features.get(feat)
+    h0     = hallazgos[0]
+    feat   = h0.get("feature", "")
+    op     = h0.get("operador", ">=")
+    umbral = h0.get("umbral", 0)
+    val    = features.get(feat)
 
-        # Feature no disponible: saltar este hallazgo sin aprobar ni rechazar.
-        # Un dato faltante no es motivo de aprobación automática.
-        if val is None:
-            continue
+    # Conserva la semántica histórica del backtest para que ambos recorran
+    # exactamente el mismo conjunto de señales.
+    if val is None:
+        return True, "dato_faltante"
 
-        cumple = (val >= umbral) if op == ">=" else (val <= umbral)
-        if cumple:
-            return True, f"ok_h{i+1} (feat={feat}, lift={h.get('lift', 0):.2f})"
-        # Si no cumple: continuar con el siguiente hallazgo (no retornar False aquí)
-
-    # Ningún hallazgo cumplió (o todos tenían val=None)
-    return False, "sin_hallazgo_cumplido"
+    cumple = (val >= umbral) if op == ">=" else (val <= umbral)
+    return (True, f"ok ({feat})") if cumple else (False, f"fail ({feat})")
 
 
 # ══════════════════════════════════════════════════════════════════
