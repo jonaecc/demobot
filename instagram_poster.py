@@ -256,7 +256,7 @@ def generar_imagen_apertura(symbol, side, entry_price, tp_pct, sl_pct,
 # ══════════════════════════════════════════════════════════════════
 
 def generar_imagen_cierre(symbol, side, entry_price, exit_price,
-                           pnl_usd, scenario=None, fondo_path=None) -> bytes:
+                           pnl_usd, scenario=None, fondo_path=None, balance=None) -> bytes:
     W, H = POST_W, POST_H
     text_color = (245, 247, 250)
     muted      = (168, 176, 186)
@@ -265,7 +265,7 @@ def generar_imagen_cierre(symbol, side, entry_price, exit_price,
 
     base = _cargar_fondo(fondo_path, W, H) or _fondo_degradado(W, H, accent)
 
-    panel_top, panel_h = 530, 600
+    panel_top, panel_h = 530, 750
     img = _con_overlay_legible(base, panel_top, panel_top + panel_h, W, H)
     draw = ImageDraw.Draw(img)
     draw.rectangle([0, 0, W, 10], fill=accent)
@@ -301,9 +301,12 @@ def generar_imagen_cierre(symbol, side, entry_price, exit_price,
         ("Movimiento", f"{move_pct:+.2f}%"),
         ("PnL",        f"${pnl_usd:+,.2f}"),
     ]
+    if balance is not None:
+        filas.append(("Balance", f"${balance:,.2f}"))
+
     for label, val in filas:
         _fila(draw, y, label, val, W, f_label, f_val, muted, text_color)
-        y += 130
+        y += 110
 
     ts = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
     draw.text((90, H - 100), ts, font=f_tag, fill=muted)
@@ -560,6 +563,7 @@ def post_cierre(side, symbol, entry_price, exit_price, pnl_usd,
             symbol=symbol, side=side, entry_price=entry_price,
             exit_price=exit_price, pnl_usd=pnl_usd, scenario=scenario,
             fondo_path=os.environ.get("IG_BACKGROUND_PATH"),
+            balance=balance,
         )
         image_url = _subir_a_imgbb(img_bytes, _env_limpio("IMGBB_API_KEY"))
 
