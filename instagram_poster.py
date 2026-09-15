@@ -548,7 +548,7 @@ def post_apertura(side, symbol, entry_price, tp_pct, sl_pct,
 
 
 def post_cierre(side, symbol, entry_price, exit_price, pnl_usd,
-                 scenario=None, log=None):
+                 scenario=None, log=None, balance=None):
     """
     Publica el resultado de una operacion cerrada (ganancia o perdida).
     Misma filosofia que post_apertura: nunca rompe el bot, correr en un hilo.
@@ -568,11 +568,15 @@ def post_cierre(side, symbol, entry_price, exit_price, pnl_usd,
             header = "Position closed with profit / Operacion cerrada con ganancia"
         else:
             header = "Position closed with loss / Operacion cerrada con perdida"
+            
+        balance_str = f"Balance: ${balance:,.2f}\n" if balance is not None else ""
+        
         caption = (
             f"{header}\n\n"
             f"{symbol}\n"
             f"Entry / Entrada: ${entry_price:,.4f} -> Exit / Salida: ${exit_price:,.4f}\n"
-            f"PnL: ${pnl_usd:+,.2f}\n\n"
+            f"PnL: ${pnl_usd:+,.2f}\n"
+            f"{balance_str}\n"
             f"{_armar_hashtags(symbol)}"
         )
         media_id = _publicar_en_instagram(
