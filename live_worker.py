@@ -1845,7 +1845,8 @@ class MLLiveBotWorker:
         notificar_cierre(
             side=side, symbol=self.symbol, entry_price=entry,
             exit_price=precio_salida, pnl_usd=pnl_neto,
-            scenario=pos.get("scenario"), log=self.log
+            scenario=pos.get("scenario"), log=self.log,
+            balance=self.cache_balance
         )
         self._manage_circuit_breaker()
         self.posicion_actual = None
