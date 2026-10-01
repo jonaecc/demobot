@@ -57,6 +57,15 @@ import sys
 import os
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
+# Rate limiter global compartido entre todos los hilos de worker
+from rate_limiter import (
+    get_rate_limiter, weight_for_klines,
+    WEIGHT_KLINES, WEIGHT_BALANCE, WEIGHT_POSITION, WEIGHT_OPEN_ORDERS,
+    WEIGHT_ALL_ORDERS, WEIGHT_ORDER, WEIGHT_CANCEL_ORDER, WEIGHT_EXCHANGE_INFO,
+    WEIGHT_LEVERAGE, WEIGHT_MARGIN_TYPE, WEIGHT_POSITION_MODE, WEIGHT_ALGO_ORDERS,
+    WEIGHT_FETCH_ORDER, WEIGHT_DEFAULT,
+)
+
 try:
     from instagram_poster import notificar_apertura, notificar_cierre, post_apertura
 except Exception as e:
@@ -457,6 +466,10 @@ class MLLiveBotWorker:
         self.use_short    = use_short
         self.demo_mode    = bool(demo_mode)
 
+        # ── Rate limiter global y WebSocket (anti-ban) ────────────
+        self._rate_limiter = get_rate_limiter()
+        self._ws_manager   = kwargs.get("ws_manager", None)
+
         # Factores TP/SL (se actualizan desde UI en el loop)
         self.factor_tp = float(tp)
         self.factor_sl = float(sl)
@@ -522,14 +535,18 @@ class MLLiveBotWorker:
     # ──────────────────────────────────────────────────────────────
 
     def _is_banned(self) -> bool:
-        """Devuelve True si el IP sigue baneado por Binance (-1003)."""
-        return time.time() * 1000 < self._api_ban_until_ms
+        """Devuelve True si el IP sigue baneado por Binance (-1003).
+        Consulta tanto el estado local como el global (compartido entre hilos)."""
+        local_ban = time.time() * 1000 < self._api_ban_until_ms
+        global_ban = self._rate_limiter.is_banned()
+        return local_ban or global_ban
 
     def _handle_rate_limit_error(self, e: Exception) -> bool:
         """
         Detecta el error -1003 (IP ban) de Binance y almacena el timestamp
         de fin del ban para evitar más requests durante ese período.
         Devuelve True si era un error de ban/rate-limit.
+        PROPAGA el ban al rate limiter global para que TODOS los hilos se detengan.
         """
         err_str = str(e)
         if "-1003" in err_str or "Way too many requests" in err_str:
@@ -539,6 +556,8 @@ class MLLiveBotWorker:
             if m:
                 ban_until_ms = int(m.group(1))
                 self._api_ban_until_ms = ban_until_ms
+                # Propagar al rate limiter global → TODOS los hilos se frenan
+                self._rate_limiter.set_ban(ban_until_ms)
                 ban_secs = max(0, (ban_until_ms - time.time() * 1000) / 1000)
                 self.log.warning(
                     f"🚫 IP baneada por Binance. Pausando requests REST por {ban_secs:.0f}s "
@@ -546,7 +565,9 @@ class MLLiveBotWorker:
                 )
             else:
                 # Sin timestamp explícito: esperar 60 s por precaución
-                self._api_ban_until_ms = (time.time() + 60) * 1000
+                ban_until_ms = int((time.time() + 60) * 1000)
+                self._api_ban_until_ms = ban_until_ms
+                self._rate_limiter.set_ban(ban_until_ms)
                 self.log.warning("🚫 Rate limit -1003 sin timestamp. Pausando 60s.")
             return True
         return False
@@ -975,6 +996,12 @@ class MLLiveBotWorker:
     def fetch_ohlcv_df(self, tf: str, limit: int = 300) -> pd.DataFrame | None:
         for attempt in range(3):
             try:
+                # Adquirir permiso del rate limiter global antes de hacer el request
+                req_weight = weight_for_klines(limit)
+                if not self._rate_limiter.acquire(weight=req_weight, timeout=60):
+                    self.log.warning(f"⏳ Rate limiter: timeout esperando permiso para fetch {tf}")
+                    return None
+
                 bars = self.exchange.fetch_ohlcv(self.symbol, timeframe=tf, limit=limit)
                 df   = pd.DataFrame(bars, columns=["ts", "open", "high", "low", "close", "vol"])
                 df   = df.iloc[:-1].copy()   # descarta vela en formación
@@ -985,6 +1012,9 @@ class MLLiveBotWorker:
                 df["ts"] = (df.index.view("int64") // 10**6).astype("int64")
                 return df
             except Exception as e:
+                # Detectar ban -1003 y propagarlo globalmente
+                if self._handle_rate_limit_error(e):
+                    return None
                 err_str = str(e)
                 is_rate_limit = "429" in err_str or "Too Many Requests" in err_str
                 if attempt < 2:
@@ -1068,6 +1098,9 @@ class MLLiveBotWorker:
         # No intentar si el IP está baneado
         if self._is_banned():
             return
+        # Adquirir permiso del rate limiter global
+        if not self._rate_limiter.acquire(weight=WEIGHT_BALANCE, timeout=10):
+            return
         try:
             balance_data   = self.client.futures_account_balance()
             balance_actual = next(
@@ -1112,9 +1145,10 @@ class MLLiveBotWorker:
         seen     = {}   # orderId → orden
 
         # ── Fuente 1: órdenes normales (siempre funciona) ──────────────────
-        try:
-            for o in (self.client.futures_get_open_orders(symbol=symbol_clean) or []):
-                oid = o.get("orderId") or o.get("clientOrderId", id(o))
+        if not self._is_banned() and self._rate_limiter.acquire(weight=WEIGHT_OPEN_ORDERS, timeout=5):
+            try:
+                for o in (self.client.futures_get_open_orders(symbol=symbol_clean) or []):
+                    oid = o.get("orderId") or o.get("clientOrderId", id(o))
                 seen[oid] = o
             self.log.info(f"[audit] futures_get_open_orders → {len(seen)} órdenes")
         except Exception as _e:
@@ -1125,13 +1159,12 @@ class MLLiveBotWorker:
         # ── Fuente 2: GET /fapi/v1/openAlgoOrders (endpoint correcto según docs) ──
         # NOTA: el endpoint es openAlgoOrders (open primero), NO algoOpenOrders.
         # algoOpenOrders devuelve 404 — nombre incorrecto que estaba en el código.
-        if self._is_banned():
-            return list(seen.values())
-        try:
-            result      = self.client._request_futures_api(
-                'get', 'openAlgoOrders', True, data={"symbol": symbol_clean}
-            )
-            # La respuesta es directamente una lista según la doc oficial
+        if not self._is_banned() and self._rate_limiter.acquire(weight=WEIGHT_ALGO_ORDERS, timeout=5):
+            try:
+                result      = self.client._request_futures_api(
+                    'get', 'openAlgoOrders', True, data={"symbol": symbol_clean}
+                )
+                # La respuesta es directamente una lista según la doc oficial
             algo_orders = result if isinstance(result, list) else result.get("orders", [])
             added = 0
             for o in algo_orders:
@@ -1151,7 +1184,7 @@ class MLLiveBotWorker:
             and (o.get("algoStatus") or o.get("status", "NEW")) in ("NEW", "WORKING")
             for o in seen.values()
         )
-        if not has_sl_so_far and not self._is_banned():
+        if not has_sl_so_far and not self._is_banned() and self._rate_limiter.acquire(weight=WEIGHT_ALL_ORDERS, timeout=5):
             try:
                 # Últimas 10 órdenes del símbolo; filtramos por estado NEW
                 all_orders = self.client.futures_get_all_orders(
@@ -1384,6 +1417,8 @@ class MLLiveBotWorker:
         if self._is_banned():
             return
         try:
+            if not self._rate_limiter.acquire(weight=WEIGHT_BALANCE, timeout=10):
+                return
             balance_data   = self.client.futures_account_balance()
             balance_actual = next((float(b["balance"]) for b in balance_data if b["asset"] == "USDT"), 0.0)
             self.cache_balance = balance_actual
@@ -1413,15 +1448,17 @@ class MLLiveBotWorker:
         Binance requiere endpoints separados para cada tipo.
         """
         try:
-            self.client.futures_cancel_all_open_orders(symbol=symbol_clean)
+            if self._rate_limiter.acquire(weight=WEIGHT_CANCEL_ORDER, timeout=5):
+                self.client.futures_cancel_all_open_orders(symbol=symbol_clean)
         except Exception:
             pass
         try:
             # DELETE /fapi/v1/algoOpenOrders — cancela todas las algo orders del símbolo
-            self.client._request_futures_api(
-                'delete', 'algoOpenOrders', True,
-                data={"symbol": symbol_clean}
-            )
+            if self._rate_limiter.acquire(weight=WEIGHT_CANCEL_ORDER, timeout=5):
+                self.client._request_futures_api(
+                    'delete', 'algoOpenOrders', True,
+                    data={"symbol": symbol_clean}
+                )
         except Exception:
             pass
 
@@ -1625,6 +1662,9 @@ class MLLiveBotWorker:
             self.sync_balance(force=True)
 
             # Precio limit: ligeramente sobre ask para LONG, bajo bid para SHORT
+            if not self._rate_limiter.acquire(weight=2, timeout=10):
+                self.log.error("❌ Rate limiter: timeout para order book.")
+                return False
             ob = self.exchange.fetch_order_book(self.symbol, limit=5)
             if side == "buy":
                 limit_price = float(ob["asks"][0][0]) * (1 + LIMIT_OFFSET_PCT / 100)
@@ -1644,6 +1684,10 @@ class MLLiveBotWorker:
                 f"nominal=${qty * limit_price:.2f}"
             )
 
+            if not self._rate_limiter.acquire(weight=WEIGHT_ORDER, timeout=10):
+                self.log.error("❌ Rate limiter: timeout para crear orden.")
+                return False
+
             order    = self.exchange.create_order(
                 self.symbol, "limit", side, qty, float(limit_price_str),
                 params={"timeInForce": "GTC"}
@@ -1661,19 +1705,20 @@ class MLLiveBotWorker:
 
             while True:
                 try:
-                    o = self.exchange.fetch_order(order_id, self.symbol)
-                    status     = o.get("status", "")
-                    filled_qty = float(o.get("filled", 0) or 0)
+                    if self._rate_limiter.acquire(weight=WEIGHT_FETCH_ORDER, timeout=2):
+                        o = self.exchange.fetch_order(order_id, self.symbol)
+                        status     = o.get("status", "")
+                        filled_qty = float(o.get("filled", 0) or 0)
 
-                    if status == "closed" or filled_qty >= float(qty) * 0.95:
-                        # Bug fix: usar average price, nunca quedarse con limit_price
-                        avg = o.get("average") or o.get("price")
-                        fill_price = float(avg) if avg else limit_price
-                        break
+                        if status == "closed" or filled_qty >= float(qty) * 0.95:
+                            # Bug fix: usar average price, nunca quedarse con limit_price
+                            avg = o.get("average") or o.get("price")
+                            fill_price = float(avg) if avg else limit_price
+                            break
 
-                    if status in ("canceled", "expired", "rejected"):
-                        self.log.warning(f"⚠️ Orden limit {status}. Señal descartada.")
-                        return False
+                        if status in ("canceled", "expired", "rejected"):
+                            self.log.warning(f"⚠️ Orden limit {status}. Señal descartada.")
+                            return False
 
                 except Exception as _fe:
                     # No romper el loop en el primer error de red — intentar de nuevo
@@ -1687,7 +1732,8 @@ class MLLiveBotWorker:
             # Si no se llenó completamente, cancelar
             if filled_qty < float(qty) * 0.95:
                 try:
-                    self.exchange.cancel_order(order_id, self.symbol)
+                    if self._rate_limiter.acquire(weight=WEIGHT_CANCEL_ORDER, timeout=5):
+                        self.exchange.cancel_order(order_id, self.symbol)
                 except Exception:
                     pass
                 self.log.warning(
@@ -1815,10 +1861,11 @@ class MLLiveBotWorker:
             precio_salida = entry
             try:
                 symbol_clean = self.get_clean_symbol()
-                pos_info = self.client.futures_position_information(symbol=symbol_clean)
-                mark = float(next((p["markPrice"] for p in pos_info), 0))
-                if mark > 0:
-                    precio_salida = mark
+                if self._rate_limiter.acquire(weight=WEIGHT_POSITION, timeout=5):
+                    pos_info = self.client.futures_position_information(symbol=symbol_clean)
+                    mark = float(next((p["markPrice"] for p in pos_info), 0))
+                    if mark > 0:
+                        precio_salida = mark
             except Exception:
                 pass
 
@@ -1887,6 +1934,10 @@ class MLLiveBotWorker:
             
             self.last_position_check = now
             symbol_clean = self.get_clean_symbol()
+            
+            if not self._rate_limiter.acquire(weight=WEIGHT_POSITION, timeout=10):
+                return
+            
             pos_info     = self.client.futures_position_information(symbol=symbol_clean)
             active_pos   = next((p for p in pos_info if float(p["positionAmt"]) != 0), None)
 
@@ -1998,40 +2049,56 @@ class MLLiveBotWorker:
                     time.sleep(wait)
                     continue
 
-                # ── Datos de mercado (Polling optimizado) ───────────────
-                try:
-                    # Polling ligero para detectar nueva vela y precio actual (peso 1)
-                    bars_2 = self.exchange.fetch_ohlcv(self.symbol, timeframe="15m", limit=2)
-                    if not bars_2 or len(bars_2) < 2:
-                        time.sleep(5)
-                        continue
-                    # Reset backoff al primer request exitoso
-                    self._poll_backoff = 5
-                except Exception as e:
-                    # Detectar ban -1003 también en ccxt (envuelve los códigos)
-                    if self._handle_rate_limit_error(e):
-                        ban_secs = max(0, (self._api_ban_until_ms / 1000) - time.time())
-                        wait = min(ban_secs + 1, 120)
-                        time.sleep(wait)
-                        continue
-                    err_str = str(e)
-                    if "429" in err_str or "Too Many Requests" in err_str:
-                        # Backoff exponencial: 30s → 60s → 120s → 120s (cap)
-                        backoff = getattr(self, "_poll_backoff", 5)
-                        backoff = min(backoff * 2, 120)
-                        self._poll_backoff = backoff
-                        self.log.error(f"Error fetching 15m ticker: {e}")
-                        self.log.warning(f"⏳ Rate limit 429 — esperando {backoff}s antes de reintentar.")
-                        time.sleep(backoff)
-                    else:
-                        self.log.error(f"Error fetching 15m ticker: {e}")
-                        time.sleep(5)
-                    continue
+                # ── Datos de mercado (WebSocket + REST fallback) ──────────
+                # Intentar obtener datos de WebSocket primero (peso 0 en API REST)
+                ws_data = None
+                if self._ws_manager and self._ws_manager.is_connected:
+                    ws_data = self._ws_manager.get_poll_data(self.symbol)
 
-                last_closed_ts = int(bars_2[-2][0])
-                current_price  = float(bars_2[-1][4])
-                current_high   = float(bars_2[-1][2])
-                current_low    = float(bars_2[-1][3])
+                if ws_data is not None:
+                    # ✅ Datos del WebSocket — sin consumir weight de la API REST
+                    last_closed_ts, current_price, current_high, current_low = ws_data
+                    self._poll_backoff = 5  # reset backoff
+                else:
+                    # 🔄 Fallback a REST polling (con rate limiter global)
+                    try:
+                        # Adquirir permiso del rate limiter antes del request
+                        if not self._rate_limiter.acquire(weight=WEIGHT_KLINES, timeout=30):
+                            self.log.warning("⏳ Rate limiter: sin permiso para poll 15m, esperando...")
+                            time.sleep(10)
+                            continue
+
+                        bars_2 = self.exchange.fetch_ohlcv(self.symbol, timeframe="15m", limit=2)
+                        if not bars_2 or len(bars_2) < 2:
+                            time.sleep(10)
+                            continue
+                        # Reset backoff al primer request exitoso
+                        self._poll_backoff = 5
+                    except Exception as e:
+                        # Detectar ban -1003 también en ccxt (envuelve los códigos)
+                        if self._handle_rate_limit_error(e):
+                            ban_secs = max(0, (self._api_ban_until_ms / 1000) - time.time())
+                            wait = min(ban_secs + 1, 120)
+                            time.sleep(wait)
+                            continue
+                        err_str = str(e)
+                        if "429" in err_str or "Too Many Requests" in err_str:
+                            # Backoff exponencial: 30s → 60s → 120s → 120s (cap)
+                            backoff = getattr(self, "_poll_backoff", 5)
+                            backoff = min(backoff * 2, 120)
+                            self._poll_backoff = backoff
+                            self.log.error(f"Error fetching 15m ticker: {e}")
+                            self.log.warning(f"⏳ Rate limit 429 — esperando {backoff}s antes de reintentar.")
+                            time.sleep(backoff)
+                        else:
+                            self.log.error(f"Error fetching 15m ticker: {e}")
+                            time.sleep(10)
+                        continue
+
+                    last_closed_ts = int(bars_2[-2][0])
+                    current_price  = float(bars_2[-1][4])
+                    current_high   = float(bars_2[-1][2])
+                    current_low    = float(bars_2[-1][3])
 
                 # ── Detección de nueva vela 15m ────────────────────
                 nueva_vela_15m = False
@@ -2111,14 +2178,20 @@ class MLLiveBotWorker:
                         if not ok:
                             self.entry_lock = False
 
-                # El gatillo es 15m — polling cada 5s es suficiente
+                # El gatillo es 15m — con WS: polling cada 2s (solo lógica local)
+                #                     sin WS: polling cada 15s (REST con rate limiter)
                 # Si el IP está baneado, esperar hasta que el ban expire
                 if self._is_banned():
                     ban_secs = max(0, (self._api_ban_until_ms / 1000) - time.time())
                     wait = min(ban_secs + 1, 120)  # cap 120s por seguridad
                     time.sleep(wait)
+                elif self._ws_manager and self._ws_manager.is_connected:
+                    # WS conectado: ciclo rápido sin consumir weight REST
+                    time.sleep(2)
                 else:
-                    time.sleep(5)
+                    # REST fallback: 15s es suficiente para velas de 15 minutos
+                    # (antes era 5s = 3x más frecuente de lo necesario)
+                    time.sleep(15)
 
             except Exception as e:
                 if self._handle_rate_limit_error(e):

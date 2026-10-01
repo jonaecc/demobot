@@ -95,7 +95,7 @@ def cargar_config(path: str = "config.json") -> dict:
 
 # ─── Entry point (Hilo del Worker) ────────────────────────────────────────────
 
-def bot_worker_thread(symbol: str, cfg: dict, delay_start: int):
+def bot_worker_thread(symbol: str, cfg: dict, delay_start: int, ws_manager=None):
     """
     Función que envuelve la creación y bucle de autoreinicio de MLLiveBotWorker para un solo símbolo.
     """
@@ -125,6 +125,7 @@ def bot_worker_thread(symbol: str, cfg: dict, delay_start: int):
         tp_fijo_pct    = cfg.get("tp_fijo_pct"),
         timeout_velas  = cfg.get("timeout_velas", 10),
         ui_ref         = ui_ref,
+        ws_manager     = ws_manager,
     )
 
     max_reinicios  = cfg.get("max_reinicios", 10)
@@ -204,11 +205,17 @@ def main():
 
     global_log.info(f"🚀 Iniciando {len(symbols)} instancias: {', '.join(symbols)}")
 
+    # ── Iniciar WebSocket Manager Global ────────────────────────────────────
+    # Import aquí para aislar dependencias si falla
+    from ws_kline_manager import KlineWSManager
+    ws_manager = KlineWSManager(symbols, demo_mode=cfg.get("demo_mode", False))
+    ws_manager.start()
+
     threads = []
     # Lanzar un hilo por cada símbolo, con un retraso escalonado (stagger) para evitar golpear la API de golpe
     for i, symbol in enumerate(symbols):
         delay = i * 2  # 2 segundos de separación
-        t = threading.Thread(target=bot_worker_thread, args=(symbol, cfg, delay), daemon=True)
+        t = threading.Thread(target=bot_worker_thread, args=(symbol, cfg, delay, ws_manager), daemon=True)
         threads.append(t)
         t.start()
 
