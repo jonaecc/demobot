@@ -188,7 +188,10 @@ def main():
         import urllib.request
         ip = urllib.request.urlopen('https://api.ipify.org', timeout=5).read().decode()
         global_log.info(f"🌐 IP pública del servidor: {ip}")
-        global_log.info("   → Agregá esta IP a la whitelist de tu API key en Binance")
+        if not cfg.get("demo_mode", False):
+            global_log.info("   → Agregá esta IP a la whitelist de tu API key en Binance (Seguridad Real)")
+        else:
+            global_log.info("   → (Modo Demo: no es necesario agregar IPs a la whitelist en Binance Testnet)")
     except Exception as e:
         global_log.warning(f"No se pudo obtener IP pública: {e}")
 
