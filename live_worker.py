@@ -1149,12 +1149,12 @@ class MLLiveBotWorker:
             try:
                 for o in (self.client.futures_get_open_orders(symbol=symbol_clean) or []):
                     oid = o.get("orderId") or o.get("clientOrderId", id(o))
-                seen[oid] = o
-            self.log.info(f"[audit] futures_get_open_orders → {len(seen)} órdenes")
-        except Exception as _e:
-            if self._handle_rate_limit_error(_e):
-                return list(seen.values())
-            self.log.warning(f"[audit] futures_get_open_orders falló: {_e}")
+                    seen[oid] = o
+                self.log.info(f"[audit] futures_get_open_orders → {len(seen)} órdenes")
+            except Exception as _e:
+                if self._handle_rate_limit_error(_e):
+                    return list(seen.values())
+                self.log.warning(f"[audit] futures_get_open_orders falló: {_e}")
 
         # ── Fuente 2: GET /fapi/v1/openAlgoOrders (endpoint correcto según docs) ──
         # NOTA: el endpoint es openAlgoOrders (open primero), NO algoOpenOrders.
@@ -1165,18 +1165,18 @@ class MLLiveBotWorker:
                     'get', 'openAlgoOrders', True, data={"symbol": symbol_clean}
                 )
                 # La respuesta es directamente una lista según la doc oficial
-            algo_orders = result if isinstance(result, list) else result.get("orders", [])
-            added = 0
-            for o in algo_orders:
-                oid = o.get("algoId") or o.get("orderId") or o.get("clientOrderId", id(o))
-                if oid not in seen:
-                    seen[oid] = o
-                    added += 1
-            self.log.info(f"[audit] openAlgoOrders → {len(algo_orders)} algo ({added} nuevas)")
-        except Exception as _e:
-            if self._handle_rate_limit_error(_e):
-                return list(seen.values())
-            self.log.warning(f"[audit] openAlgoOrders falló: {_e}")
+                algo_orders = result if isinstance(result, list) else result.get("orders", [])
+                added = 0
+                for o in algo_orders:
+                    oid = o.get("algoId") or o.get("orderId") or o.get("clientOrderId", id(o))
+                    if oid not in seen:
+                        seen[oid] = o
+                        added += 1
+                self.log.info(f"[audit] openAlgoOrders → {len(algo_orders)} algo ({added} nuevas)")
+            except Exception as _e:
+                if self._handle_rate_limit_error(_e):
+                    return list(seen.values())
+                self.log.warning(f"[audit] openAlgoOrders falló: {_e}")
 
         # ── Fuente 3: historial reciente si aún no tenemos SL ──────────────
         has_sl_so_far = any(
