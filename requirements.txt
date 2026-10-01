@@ -2,8 +2,7 @@ ccxt==4.3.89
 pandas>=2.2.2
 pandas-ta>=0.4.71b0
 numpy>=2.2.6
-python-binance>=1.0.20
+python-binance==1.0.19
 scipy>=1.13.1
-pillow
-requests
-python-dotenv
+
+websocket-client>=1.8.0
