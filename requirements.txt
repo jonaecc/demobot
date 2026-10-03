@@ -4,5 +4,7 @@ pandas-ta>=0.4.71b0
 numpy>=2.2.6
 python-binance==1.0.19
 scipy>=1.13.1
-
 websocket-client>=1.8.0
+pillow>=10.0.0
+requests>=2.31.0
+python-dotenv>=1.0.0
