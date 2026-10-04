@@ -1842,23 +1842,27 @@ class MLLiveBotWorker:
         # Forzar sync inmediato del balance real
         self.sync_balance(force=True)
 
-        entry_balance = float(pos.get("entry_balance", 0.0))
         qty = float(pos["qty"])
         costos = entry * qty * 0.0009   # aprox 2 lados
 
-        # Calcular PnL usando el balance real si tenemos entry_balance válido
-        if entry_balance > 0:
-            pnl_neto = self.cache_balance - entry_balance
-            pnl_bruto = pnl_neto + costos
+        precio_salida = entry
+        
+        # Buscar el precio de salida real en las últimas órdenes cerradas
+        try:
+            if self._rate_limiter.acquire(weight=5, timeout=5):
+                orders = self.exchange.fetch_closed_orders(self.symbol, limit=10)
+                opp_side = "sell" if side == "buy" else "buy"
+                for order in reversed(orders):
+                    if order["side"] == opp_side and order["status"] == "closed":
+                        avg_price = order.get("average") or order.get("price")
+                        if avg_price:
+                            precio_salida = float(avg_price)
+                            break
+        except Exception as e:
+            self.log.warning(f"No se pudo obtener precio de salida real: {e}")
 
-            # Deducir el precio de salida basado en el PnL real
-            if side == "buy":
-                precio_salida = entry + (pnl_bruto / qty)
-            else:
-                precio_salida = entry - (pnl_bruto / qty)
-        else:
-            # Fallback (no debería ocurrir, pero por seguridad)
-            precio_salida = entry
+        # Si no encontramos la orden, usar fallback del mark price
+        if precio_salida == entry:
             try:
                 symbol_clean = self.get_clean_symbol()
                 if self._rate_limiter.acquire(weight=WEIGHT_POSITION, timeout=5):
@@ -1869,11 +1873,12 @@ class MLLiveBotWorker:
             except Exception:
                 pass
 
-            pnl_bruto = (
-                (precio_salida - entry) * qty if side == "buy"
-                else (entry - precio_salida) * qty
-            )
-            pnl_neto = pnl_bruto - costos
+        # Calcular PnL de ESTA posición individualmente
+        pnl_bruto = (
+            (precio_salida - entry) * qty if side == "buy"
+            else (entry - precio_salida) * qty
+        )
+        pnl_neto = pnl_bruto - costos
 
         self.daily_pnl += pnl_neto
 
