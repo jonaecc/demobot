@@ -87,19 +87,7 @@ FACTOR_SL_DEFAULT    = 1.00   # factor SL óptimo OOS
 # Análisis: 2024-05-01 → presente | Resultado con exclusión: PF=2.030, WR=57.5%, MDD=0.7%
 ESCENARIOS_EXCLUIDOS = [
     # Peores por PnL total OOS (ordenados de peor a mejor)
-    "T1__UD_UU_UD", "T1__DD_DD_DU", "T3__UD_DD_DU", "T2__UU_UD_DD",
-    "T4__DD_DU_DD", "T2__DU_UD_DU", "T3__DD_UU_DU", "T1__UU_DU_DD",
-    "T1__UD_DU_DD", "T4__UD_DU_UU", "T1__DU_UU_UD", "T2__DU_UD_DD",
-    "T1__DD_UD_UD", "T2__UU_DU_DD", "T2__UD_DU_UD", "T3__DD_DU_DU",
-    "T4__UU_DU_DU", "T2__DU_DD_DD", "T1__DU_DD_DU", "T4__UU_DD_DU",
-    "T4__DU_UD_DU", "T4__DD_UD_DD", "T1__DU_UD_UD", "T3__DU_DD_DU",
-    "T1__DD_UD_UU", "T3__DD_DD_UD", "T1__DU_DD_DD", "T3__DD_DU_DD",
-    "T4__UU_DD_UD", "T3__DD_DU_UD", "T2__UU_UU_UU", "T4__DD_DU_UD",
-    "T4__DD_DD_UU", "T1__UD_DU_UU", "T4__UU_DU_UU", "T3__DD_DD_UU",
-    "T1__UD_UD_DD", "T4__DU_UD_UU", "T3__UU_UD_UD", "T4__DD_DD_DD",
-    "T2__DU_UU_DU", "T4__UD_DU_UD", "T3__DU_DU_UU", "T3__UU_UU_UD",
-    "T3__UD_DU_UD", "T2__UU_DD_UU", "T3__DD_UD_DD", "T2__UD_DU_DD",
-    "T3__UU_DD_UU", "T2__UU_DU_UU",
+    "T1__UD_UU_UD",
 ]
 
 
